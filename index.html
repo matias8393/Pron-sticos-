@@ -57,57 +57,65 @@
             font-weight: bold;
             box-sizing: border-box;
         }
-        .loading {
-            text-align: center;
-            color: #94a3b8;
-            margin-top: 40px;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>⚽ PRONÓSTICOS DE HOY (IA)</h1>
+        <h1>⚽ PRONÓSTICOS DE HOY</h1>
         <div id="pronosticos-container">
-            <div class="loading">Cargando pronósticos inteligentes...</div>
+            <!-- Los partidos se cargan aquí -->
         </div>
     </div>
 
     <script>
-        const API_URL = "https://backend-pronosticos.onrender.com/api/pronosticos";
-
-        async function cargarPronosticos() {
-            const container = document.getElementById("pronosticos-container");
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-
-                container.innerHTML = "";
-
-                if (!data || data.length === 0) {
-                    container.innerHTML = "<div class='loading'>No hay pronósticos disponibles en este momento.</div>";
-                    return;
-                }
-
-                data.forEach(item => {
-                    const card = document.createElement("div");
-                    card.className = "card";
-                    card.innerHTML = `
-                        <div class="match-time">⏰ ${item.hora || 'HOY'}</div>
-                        <div class="match-title">${item.partido}</div>
-                        <div class="prediction">🎯 Pronóstico: ${item.pronostico}</div>
-                        <a href="#" class="btn">Apostar Ahora (Cuota ${item.cuota})</a>
-                    `;
-                    container.appendChild(card);
-                });
-
-            } catch (error) {
-                console.error("Error al cargar la API:", error);
-                container.innerHTML = "<div class='loading' style='color: #ef4444;'>Error al conectar con el servidor de IA.</div>";
+        // Lista oficial de pronósticos actualizados
+        const pronosticosData = [
+            {
+                hora: "HOY",
+                partido: "Brentford vs Tottenham Hotspur",
+                pronostico: "Brentford a ganar",
+                cuota: "1.85"
+            },
+            {
+                hora: "HOY",
+                partido: "Everton vs Crystal Palace",
+                pronostico: "Everton a ganar",
+                cuota: "1.85"
+            },
+            {
+                hora: "HOY",
+                partido: "Ipswich Town vs Sunderland",
+                pronostico: "Ipswich Town a ganar",
+                cuota: "1.85"
+            },
+            {
+                hora: "HOY",
+                partido: "Nottingham Forest vs Leeds United",
+                pronostico: "Nottingham Forest a ganar",
+                cuota: "1.85"
+            },
+            {
+                hora: "HOY",
+                partido: "Hull City vs Manchester United",
+                pronostico: "Hull City a ganar",
+                cuota: "1.85"
             }
-        }
+        ];
 
-        cargarPronosticos();
+        const container = document.getElementById("pronosticos-container");
+        
+        pronosticosData.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+                <div class="match-time">⏰ ${item.hora}</div>
+                <div class="match-title">${item.partido}</div>
+                <div class="prediction">🎯 Pronóstico: ${item.pronostico}</div>
+                <a href="#" class="btn">Apostar Ahora (Cuota ${item.cuota})</a>
+            `;
+            container.appendChild(card);
+        });
     </script>
 </body>
 </html>
