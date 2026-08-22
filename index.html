@@ -3,32 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pronósticos del Día</title>
+  <title>Sistema de Pronósticos</title>
   <style>
-    body { font-family: system-ui, sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-    .card { background: #1e293b; padding: 2rem; border-radius: 12px; text-align: center; max-width: 400px; width: 90%; }
-    button { background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-top: 1rem; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 1rem; box-sizing: border-box; }
+    .card { background: #1e293b; padding: 2rem; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; }
+    input { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+    button { width: 100%; background: #2563eb; color: white; border: none; padding: 0.75rem; border-radius: 6px; cursor: pointer; margin-top: 1rem; font-weight: bold; }
+    .btn-danger { background: #ef4444; }
+    .btn-admin { background: #10b981; margin-top: 0.5rem; }
+    .toggle { text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #94a3b8; cursor: pointer; }
+    .user-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #334155; text-align: left; }
+    .badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; }
+    .approved { background: #10b981; }
+    .pending { background: #f59e0b; }
   </style>
 </head>
 <body>
-  <div class="card">
+
+  <!-- VISTA DE AUTH (LOGIN / REGISTRO) -->
+  <div class="card" id="view-auth">
+    <h2 id="auth-title">Iniciar Sesión</h2>
+    <input type="email" id="email" placeholder="Correo electrónico">
+    <input type="password" id="password" placeholder="Contraseña">
+    <button onclick="handleAuth()" id="btn-auth">Ingresar</button>
+    <div class="toggle" onclick="toggleAuthMode()" id="toggle-auth">¿No tienes cuenta? Regístrate aquí</div>
+  </div>
+
+  <!-- VISTA PRINCIPAL (PRONÓSTICOS) -->
+  <div class="card" id="view-main" style="display:none;">
     <h1>Pronósticos del Día</h1>
-    <div id="content">
-      <p>🎉 ¡Bienvenido a la plataforma de Pronósticos!</p>
-      <button onclick="logout()">Cerrar Sesión</button>
-    </div>
+    <p>🎉 ¡Bienvenido a la plataforma de Pronósticos!</p>
+    <button class="btn-admin" onclick="showView('view-admin'); renderUsers();">Panel Admin</button>
+    <button class="btn-danger" onclick="logout()">Cerrar Sesión</button>
+  </div>
+
+  <!-- VISTA DE ADMINISTRACIÓN -->
+  <div class="card" id="view-admin" style="display:none;">
+    <h2>Administración de Usuarios</h2>
+    <div id="userList"></div>
+    <button onclick="showView('view-main')">Volver a Pronósticos</button>
   </div>
 
   <script>
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-      window.location.href = 'login.html';
+    let isRegister = false;
+
+    function showView(viewId) {
+      document.getElementById('view-auth').style.display = 'none';
+      document.getElementById('view-main').style.display = 'none';
+      document.getElementById('view-admin').style.display = 'none';
+      document.getElementById(viewId).style.display = 'block';
+    }
+
+    function checkSession() {
+      const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (currentUser) {
+        showView('view-main');
+      } else {
+        showView('view-auth');
+      }
+    }
+
+    function toggleAuthMode() {
+      isRegister = !isRegister;
+      document.getElementById('auth-title').innerText = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+      document.getElementById('btn-auth').innerText = isRegister ? 'Registrarse' : 'Ingresar';
+      document.getElementById('toggle-auth').innerText = isRegister ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate aquí';
+    }
+
+    function handleAuth() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (!email || !password) return alert('Completa todos los campos');
+
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+
+      if (isRegister) {
+        if (users.some(u => u.email === email)) return alert('El usuario ya existe');
+        users.push({ email, password, approved: false });
+        localStorage.setItem('users', JSON.stringify(users));
+        alert('Registro exitoso. Solicita aprobación al administrador.');
+        toggleAuthMode();
+      } else {
+        const user = users.find(u => u.email === email && u.password === password);
+        if (!user) return alert('Credenciales incorrectas');
+        if (!user.approved) return alert('Tu cuenta aún no ha sido aprobada');
+        
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        checkSession();
+      }
     }
 
     function logout() {
       localStorage.removeItem('currentUser');
-      window.location.href = 'login.html';
+      checkSession();
     }
+
+    function renderUsers() {
+      const listContainer = document.getElementById('userList');
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      listContainer.innerHTML = users.length === 0 ? '<p>No hay usuarios.</p>' : '';
+
+      users.forEach((user, index) => {
+        const item = document.createElement('div');
+        item.className = 'user-item';
+        item.innerHTML = `
+          <div>
+            <strong>${user.email}</strong><br>
+            <span class="badge ${user.approved ? 'approved' : 'pending'}">${user.approved ? 'Aprobado' : 'Pendiente'}</span>
+          </div>
+        `;
+        if (!user.approved) {
+          const btn = document.createElement('button');
+          btn.style.width = 'auto';
+          btn.style.marginTop = '0';
+          btn.innerText = 'Aprobar';
+          btn.onclick = () => {
+            users[index].approved = true;
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUsers();
+          };
+          item.appendChild(btn);
+        }
+        listContainer.appendChild(item);
+      });
+    }
+
+    checkSession();
   </script>
 </body>
 </html>
