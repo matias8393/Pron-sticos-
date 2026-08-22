@@ -3,47 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Pronósticos</title>
+  <title>Pronósticos del Día</title>
   <style>
-    body { font-family: system-ui, sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 1rem; box-sizing: border-box; }
-    .card { background: #1e293b; padding: 2rem; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; }
-    input { width: 100%; padding: 0.75rem; margin: 0.5rem 0; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
-    button { width: 100%; background: #2563eb; color: white; border: none; padding: 0.75rem; border-radius: 6px; cursor: pointer; margin-top: 1rem; font-weight: bold; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #0b132b; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .container { width: 100%; max-width: 420px; }
+    .card { background-color: #1c2541; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #8d99ae; margin-bottom: 20px; }
+    
+    /* PRONÓSTICOS */
+    .bet-card { background: #131b2e; border-radius: 14px; padding: 18px; margin-bottom: 16px; border: 1px solid #2a385b; text-align: left; }
+    .bet-title { font-size: 12px; font-weight: 700; color: #48cae4; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+    .match { font-size: 18px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .vs { font-size: 13px; color: #8d99ae; font-weight: normal; }
+    .pick-btn { background: #ffb703; color: #000; font-weight: 700; font-size: 15px; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 10px; display: block; text-decoration: none; }
+    .odd-btn { background: #10b981; color: #ffffff; font-weight: 700; font-size: 15px; padding: 12px; border-radius: 8px; text-align: center; display: block; text-decoration: none; }
+    
+    /* INPUTS Y BOTONES */
+    input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2a385b; background: #0b132b; color: white; }
+    button { width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; font-size: 15px; }
     .btn-danger { background: #ef4444; }
-    .btn-sec { background: #475569; margin-top: 0.5rem; }
-    .toggle { text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #94a3b8; cursor: pointer; }
-    .user-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #334155; text-align: left; }
-    .badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; }
-    .approved { background: #10b981; }
-    .pending { background: #f59e0b; }
-    .admin-link { margin-top: 1.5rem; font-size: 0.8rem; color: #64748b; cursor: pointer; text-decoration: underline; }
+    .btn-warning { background: #f59e0b; }
+    .btn-success { background: #10b981; }
+    .btn-sec { background: #475569; margin-top: 10px; }
+    
+    .toggle { margin-top: 16px; font-size: 14px; color: #8d99ae; cursor: pointer; }
+    .admin-link { margin-top: 20px; font-size: 12px; color: #48cae4; cursor: pointer; text-decoration: underline; }
+    
+    /* LISTA DE USUARIOS EN ADMIN */
+    .user-item { background: #131b2e; padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; border: 1px solid #2a385b; }
+    .user-info { margin-bottom: 8px; font-size: 14px; }
+    .badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+    .approved { background: #10b981; color: white; }
+    .pending { background: #f59e0b; color: black; }
+    .user-actions { display: flex; gap: 6px; }
+    .user-actions button { margin-top: 0; padding: 6px; font-size: 12px; }
   </style>
 </head>
 <body>
 
-  <!-- VISTA DE AUTH -->
-  <div class="card" id="view-auth">
-    <h2 id="auth-title">Iniciar Sesión</h2>
-    <input type="email" id="email" placeholder="Correo electrónico">
-    <input type="password" id="password" placeholder="Contraseña">
-    <button onclick="handleAuth()" id="btn-auth">Ingresar</button>
-    <div class="toggle" onclick="toggleAuthMode()" id="toggle-auth">¿No tienes cuenta? Regístrate aquí</div>
-    <div class="admin-link" onclick="openAdmin()">Acceso Administrador</div>
-  </div>
+  <div class="container">
+    <!-- VISTA DE AUTENTICACIÓN -->
+    <div class="card" id="view-auth">
+      <h1 id="auth-title">Iniciar Sesión</h1>
+      <p class="subtitle">Accede a tus pronósticos deportivos</p>
+      <input type="email" id="email" placeholder="Correo electrónico">
+      <input type="password" id="password" placeholder="Contraseña">
+      <button onclick="handleAuth()" id="btn-auth">Ingresar</button>
+      <div class="toggle" onclick="toggleAuthMode()" id="toggle-auth">¿No tienes cuenta? Regístrate aquí</div>
+      <div class="admin-link" onclick="openAdmin()">Acceso Administrador</div>
+    </div>
 
-  <!-- VISTA PRINCIPAL -->
-  <div class="card" id="view-main" style="display:none;">
-    <h1>Pronósticos del Día</h1>
-    <p>🎉 ¡Bienvenido a la plataforma de Pronósticos!</p>
-    <button class="btn-danger" onclick="logout()">Cerrar Sesión</button>
-  </div>
+    <!-- VISTA PRINCIPAL (PRONÓSTICOS AUTOMÁTICOS) -->
+    <div class="card" id="view-main" style="display:none;">
+      <h1>Pronósticos del Día</h1>
+      <div class="subtitle" id="last-update"></div>
+      
+      <div class="bet-card">
+        <div class="bet-title">Apuesta del Día</div>
+        <div class="match">
+          <span>Athletic Bilbao</span>
+          <span class="vs">vs</span>
+          <span>Sevilla FC</span>
+        </div>
+        <div class="pick-btn">👉 Athletic Bilbao a ganar</div>
+        <a href="https://1win.lat" target="_blank" class="odd-btn">Cuota 1.70 — Ver en 1win.lat</a>
+      </div>
 
-  <!-- VISTA DE ADMINISTRACIÓN -->
-  <div class="card" id="view-admin" style="display:none;">
-    <h2>Aprobar Usuarios</h2>
-    <p style="font-size: 0.85rem; color: #94a3b8;">Admin: matiasmorel.05@gmail.com</p>
-    <div id="userList"></div>
-    <button class="btn-sec" onclick="showView('view-auth')">Volver al Login</button>
+      <div class="bet-card">
+        <div class="bet-title">Apuesta de Bonificación</div>
+        <div class="match">
+          <span>Genoa</span>
+          <span class="vs">vs</span>
+          <span>Napoli</span>
+        </div>
+        <div class="pick-btn">👉 Napoli a ganar</div>
+        <a href="https://1win.lat" target="_blank" class="odd-btn">Cuota 1.91 — Ver en 1win.lat</a>
+      </div>
+
+      <button class="btn-danger" onclick="logout()">Cerrar Sesión</button>
+    </div>
+
+    <!-- VISTA DE ADMINISTRACIÓN DE USUARIOS -->
+    <div class="card" id="view-admin" style="display:none;">
+      <h1>Panel de Aprobaciones</h1>
+      <p class="subtitle">Admin: matiasmorel.05@gmail.com</p>
+      <div id="userList"></div>
+      <button class="btn-sec" onclick="showView('view-auth')">Volver al Login</button>
+    </div>
   </div>
 
   <script>
@@ -71,6 +119,7 @@
     function checkSession() {
       const currentUser = JSON.parse(localStorage.getItem('currentUser'));
       if (currentUser) {
+        document.getElementById('last-update').innerText = 'Última actualización: ' + new Date().toLocaleString();
         showView('view-main');
       } else {
         showView('view-auth');
@@ -93,17 +142,10 @@
 
       if (isRegister) {
         if (users.some(u => u.email === email)) return alert('El usuario ya existe');
-        
-        // Si se registra con el correo de admin, se aprueba automáticamente
         const isApproved = (email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
         users.push({ email, password, approved: isApproved });
         localStorage.setItem('users', JSON.stringify(users));
-        
-        if (isApproved) {
-          alert('Cuenta de administrador creada y aprobada automáticamente.');
-        } else {
-          alert('Registro exitoso. Solicita aprobación al administrador.');
-        }
+        alert(isApproved ? 'Cuenta de administrador lista.' : 'Registro exitoso. Solicita aprobación al administrador.');
         toggleAuthMode();
       } else {
         const user = users.find(u => u.email === email && u.password === password);
@@ -120,34 +162,45 @@
       checkSession();
     }
 
+    /* GESTIÓN DE USUARIOS */
     function renderUsers() {
       const listContainer = document.getElementById('userList');
       const users = JSON.parse(localStorage.getItem('users') || '[]');
-      listContainer.innerHTML = users.length === 0 ? '<p>No hay usuarios registrados.</p>' : '';
+      listContainer.innerHTML = users.length === 0 ? '<p class="subtitle">No hay usuarios registrados.</p>' : '';
 
       users.forEach((user, index) => {
         const item = document.createElement('div');
         item.className = 'user-item';
         item.innerHTML = `
-          <div>
+          <div class="user-info">
             <strong>${user.email}</strong><br>
             <span class="badge ${user.approved ? 'approved' : 'pending'}">${user.approved ? 'Aprobado' : 'Pendiente'}</span>
           </div>
+          <div class="user-actions">
+            ${user.approved 
+              ? `<button class="btn-warning" onclick="toggleApprove(${index}, false)">Desaprobar</button>`
+              : `<button class="btn-success" onclick="toggleApprove(${index}, true)">Aprobar</button>`
+            }
+            <button class="btn-danger" onclick="deleteUser(${index})">Eliminar</button>
+          </div>
         `;
-        if (!user.approved) {
-          const btn = document.createElement('button');
-          btn.style.width = 'auto';
-          btn.style.marginTop = '0';
-          btn.innerText = 'Aprobar';
-          btn.onclick = () => {
-            users[index].approved = true;
-            localStorage.setItem('users', JSON.stringify(users));
-            renderUsers();
-          };
-          item.appendChild(btn);
-        }
         listContainer.appendChild(item);
       });
+    }
+
+    function toggleApprove(index, status) {
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      users[index].approved = status;
+      localStorage.setItem('users', JSON.stringify(users));
+      renderUsers();
+    }
+
+    function deleteUser(index) {
+      if (!confirm("¿Seguro que deseas eliminar este usuario?")) return;
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      users.splice(index, 1);
+      localStorage.setItem('users', JSON.stringify(users));
+      renderUsers();
     }
 
     checkSession();
