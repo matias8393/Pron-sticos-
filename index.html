@@ -1,153 +1,113 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VIP Predictions</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #0f172a; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-    .container { width: 100%; max-width: 450px; background: #1e293b; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 1px solid #334155; }
-    h1 { text-align: center; font-size: 1.5rem; margin-bottom: 20px; color: #38bdf8; text-transform: uppercase; letter-spacing: 1px; }
-    .input-group { margin-bottom: 15px; }
-    label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 5px; }
-    input { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #fff; font-size: 1rem; outline: none; }
-    input:focus { border-color: #38bdf8; }
-    .btn { width: 100%; padding: 12px; background: #0284c7; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-    .btn:hover { background: #0369a1; }
-    .error { color: #f87171; text-align: center; font-size: 0.85rem; margin-top: 10px; display: none; }
-    .category-btn { background: #334155; margin-bottom: 10px; }
-    .category-btn:hover { background: #475569; }
-    .card { background: #0f172a; border-radius: 10px; padding: 15px; margin-bottom: 12px; border: 1px solid #334155; }
-    .card-time { font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px; }
-    .card-teams { font-weight: bold; font-size: 1.05rem; margin-bottom: 6px; color: #fff; }
-    .card-pick { color: #4ade80; font-weight: bold; font-size: 0.95rem; margin-bottom: 10px; }
-    .btn-bet { display: block; text-align: center; background: #2563eb; color: #fff; text-decoration: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; }
-    .btn-bet:hover { background: #1d4ed8; }
-    .hidden { display: none !important; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronósticos Deportivos - IA</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0b0f19;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #38bdf8;
+            font-size: 24px;
+            margin-bottom: 25px;
+        }
+        .card {
+            background-color: #1e293b;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid #334155;
+        }
+        .match-time {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+        .match-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .prediction {
+            color: #4ade80;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: #2563eb;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+        .loading {
+            text-align: center;
+            color: #94a3b8;
+            margin-top: 40px;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- PANTALLA 1: LOGIN -->
-  <div id="loginSection" class="container">
-    <h1>Acceso VIP</h1>
-    <div class="input-group">
-      <label>Usuario</label>
-      <input type="text" id="username" placeholder="Ingresa tu usuario">
+    <div class="container">
+        <h1>⚽ PRONÓSTICOS DE HOY (IA)</h1>
+        <div id="pronosticos-container">
+            <div class="loading">Cargando pronósticos inteligentes...</div>
+        </div>
     </div>
-    <div class="input-group">
-      <label>Contraseña</label>
-      <input type="password" id="password" placeholder="Ingresa tu contraseña">
-    </div>
-    <button class="btn" onclick="login()">Ingresar</button>
-    <p id="loginError" class="error">Usuario o contraseña incorrectos.</p>
-  </div>
 
-  <!-- PANTALLA 2: CATEGORÍAS -->
-  <div id="categoriesSection" class="container hidden">
-    <h1>Categorías VIP</h1>
-    <button class="btn category-btn" onclick="showCategory('diarias')">⚽ Pronósticos de Hoy</button>
-    <button class="btn category-btn" onclick="showCategory('combinadas')">🔥 Combinada del Día</button>
-    <button class="btn category-btn" onclick="showCategory('cuotaAlta')">🚀 Cuota Alta VIP</button>
-    <button class="btn" style="background:#ef4444; margin-top:20px;" onclick="logout()">Cerrar Sesión</button>
-  </div>
+    <script>
+        const API_URL = "https://backend-pronosticos.onrender.com/api/pronosticos";
 
-  <!-- PANTALLA 3: PRONÓSTICOS -->
-  <div id="predictionsSection" class="container hidden">
-    <h1 id="categoryTitle">Pronósticos</h1>
-    <div id="predictionsContent">
-      <div style="text-align:center; color:#94a3b8; padding:20px;">Cargando pronósticos...</div>
-    </div>
-    <button class="btn" style="background:#475569; margin-top:15px;" onclick="backToCategories()">Volver a Categorías</button>
-  </div>
+        async function cargarPronosticos() {
+            const container = document.getElementById("pronosticos-container");
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
 
-  <script>
-    // Usuarios permitidos (puedes agregar más aquí)
-    const validUsers = {
-      "vip1": "1234",
-      "admin": "admin123"
-    };
+                container.innerHTML = "";
 
-    function login() {
-      const user = document.getElementById('username').value.trim();
-      const pass = document.getElementById('password').value.trim();
-      const errorMsg = document.getElementById('loginError');
+                if (!data || data.length === 0) {
+                    container.innerHTML = "<div class='loading'>No hay pronósticos disponibles en este momento.</div>";
+                    return;
+                }
 
-      if (validUsers[user] && validUsers[user] === pass) {
-        errorMsg.style.display = 'none';
-        document.getElementById('loginSection').classList.add('hidden');
-        document.getElementById('categoriesSection').classList.remove('hidden');
-      } else {
-        errorMsg.style.display = 'block';
-      }
-    }
+                data.forEach(item => {
+                    const card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
+                        <div class="match-time">⏰ ${item.hora || 'HOY'}</div>
+                        <div class="match-title">${item.partido}</div>
+                        <div class="prediction">🎯 Pronóstico: ${item.pronostico}</div>
+                        <a href="#" class="btn">Apostar Ahora (Cuota ${item.cuota})</a>
+                    `;
+                    container.appendChild(card);
+                });
 
-    function logout() {
-      document.getElementById('username').value = '';
-      document.getElementById('password').value = '';
-      document.getElementById('categoriesSection').classList.add('hidden');
-      document.getElementById('loginSection').classList.remove('hidden');
-    }
-
-    function backToCategories() {
-      document.getElementById('predictionsSection').classList.add('hidden');
-      document.getElementById('categoriesSection').classList.remove('hidden');
-    }
-
-    async function showCategory(type) {
-      document.getElementById('categoriesSection').classList.add('hidden');
-      document.getElementById('predictionsSection').classList.remove('hidden');
-      
-      const title = document.getElementById('categoryTitle');
-      const container = document.getElementById('predictionsContent');
-
-      if (type === 'diarias') {
-        title.innerText = "⚽ Pronósticos de Hoy";
-        container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">Cargando partidos en vivo desde el servidor...</div>';
-        
-        try {
-          const response = await fetch('https://backend-pronosticos.onrender.com/api/pronosticos');
-          const data = await response.json();
-
-          if (data.success && data.partidos.length > 0) {
-            container.innerHTML = data.partidos.map(p => `
-              <div class="card">
-                <div class="card-time">⏰ ${p.time}</div>
-                <div class="card-teams">${p.teamA} vs ${p.teamB}</div>
-                <div class="card-pick">🎯 Pronóstico: ${p.pick}</div>
-                <a href="https://one-vv4322.com/casino?p=n2jc" target="_blank" class="btn-bet">
-                   Apostar Ahora (Cuota ${p.odd})
-                </a>
-              </div>
-            `).join('');
-          } else {
-            container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px;">No hay partidos disponibles hoy.</div>';
-          }
-        } catch (err) {
-          container.innerHTML = '<div style="text-align:center; color:#ef4444; padding:20px;">Error al conectar con el servidor.</div>';
+            } catch (error) {
+                console.error("Error al cargar la API:", error);
+                container.innerHTML = "<div class='loading' style='color: #ef4444;'>Error al conectar con el servidor de IA.</div>";
+            }
         }
 
-      } else if (type === 'combinadas') {
-        title.innerText = "🔥 Combinada del Día";
-        container.innerHTML = `
-          <div class="card">
-            <div class="card-teams">Combinada Estrellas de Hoy</div>
-            <div class="card-pick">🎯 Cuota Total: 3.50</div>
-            <a href="https://one-vv4322.com/casino?p=n2jc" target="_blank" class="btn-bet">Apostar Combinada</a>
-          </div>
-        `;
-      } else if (type === 'cuotaAlta') {
-        title.innerText = "🚀 Cuota Alta VIP";
-        container.innerHTML = `
-          <div class="card">
-            <div class="card-teams">Selección Especial VIP</div>
-            <div class="card-pick">🎯 Cuota Total: 8.00</div>
-            <a href="https://one-vv4322.com/casino?p=n2jc" target="_blank" class="btn-bet">Apostar Cuota Alta</a>
-          </div>
-        `;
-      }
-    }
-  </script>
+        cargarPronosticos();
+    </script>
 </body>
-</htm
+</html>
