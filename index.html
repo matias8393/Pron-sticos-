@@ -3,86 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apuestas del Día</title>
+  <title>Pronósticos del Día</title>
   <style>
-    body { font-family: -apple-system, sans-serif; background-color: #0b132b; color: #ffffff; margin: 0; padding: 16px; display: flex; flex-direction: column; align-items: center; }
-    .header { text-align: center; margin-bottom: 20px; }
-    .header h1 { font-size: 1.5rem; margin: 0 0 8px 0; }
-    .header p { font-size: 0.85rem; color: #a0aec0; margin: 0; }
-    .card { background: #1c2541; border-radius: 12px; padding: 16px; width: 100%; max-width: 450px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); margin-bottom: 16px; }
-    .card-title { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #48cae4; margin-bottom: 12px; font-weight: bold; }
-    .match-teams { display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; }
-    .prediction-badge { background: #ffb703; color: #000; padding: 8px 12px; border-radius: 8px; font-weight: bold; text-align: center; margin-bottom: 10px; }
-    .odd-btn { background: #2ec4b6; color: #fff; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; display: block; text-decoration: none; }
-    .status { text-align: center; color: #cbd5e1; font-size: 0.9rem; }
-    .logout-btn { background: transparent; color: #a0aec0; border: 1px solid #a0aec0; padding: 6px 12px; border-radius: 6px; margin-top: 10px; cursor: pointer; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .card { background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
+    button { background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-top: 1rem; }
   </style>
 </head>
 <body>
-
-  <div class="header">
+  <div class="card">
     <h1>Pronósticos del Día</h1>
-    <div id="status" class="status">Verificando sesión...</div>
-    <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+    <p id="status">Verificando sesión...</p>
+    <div id="content" style="display:none;">
+      <p>🎉 ¡Bienvenido! Aquí están los pronósticos de hoy.</p>
+      <button onclick="logout()">Cerrar Sesión</button>
+    </div>
   </div>
 
-  <div id="contenedor-partidos"></div>
+  <script>
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDAs8TnsLrIEUq5jcUOVybRt6uBWQsj1s0",
-      authDomain: "pronosticos-18dd2.firebaseapp.com",
-      projectId: "pronosticos-18dd2",
-      storageBucket: "pronosticos-18dd2.firebasestorage.app",
-      messagingSenderId: "468792609905",
-      appId: "1:468792609905:web:88180980f8be347ab8dfd0"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    window.logout = () => signOut(auth).then(() => window.location.href = "login.html");
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
+    if (!currentUser) {
+      window.location.href = 'login.html';
+    } else {
+      const validUser = users.find(u => u.email === currentUser.email && u.approved);
+      if (!validUser) {
+        alert('Tu cuenta aún no ha sido aprobada por un administrador.');
+        localStorage.removeItem('currentUser');
+        window.location.href = 'login.html';
+      } else {
+        document.getElementById('status').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
       }
+    }
 
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists() || !userDoc.data().approved) {
-        await signOut(auth);
-        window.location.href = "login.html";
-        return;
-      }
-
-      // Cargar datos
-      const API_URL = "https://script.google.com/macros/s/AKfycbzmGJ9xtP6mdvkq9EcTI0ueeisD58-iQ2vko6BDz-usayKPszvjMJJwA4EW9woWYrxR/exec";
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(data => {
-          document.getElementById('status').innerText = "Última actualización: " + new Date(data.fecha).toLocaleString();
-          document.getElementById('contenedor-partidos').innerHTML = `
-            <div class="card">
-              <div class="card-title">Apuesta del día</div>
-              <div class="match-teams"><span>Athletic Bilbao</span><span>vs</span><span>Sevilla FC</span></div>
-              <div class="prediction-badge">👉 Athletic Bilbao a ganar</div>
-              <a href="https://1win.lat" target="_blank" class="odd-btn">Cuota 1.70 — Ver en 1win</a>
-            </div>
-            <div class="card">
-              <div class="card-title">Apuesta de bonificación</div>
-              <div class="match-teams"><span>Genoa</span><span>vs</span><span>Napoli</span></div>
-              <div class="prediction-badge">👉 Napoli a ganar</div>
-              <a href="https://1win.lat" target="_blank" class="odd-btn">Cuota 1.91 — Ver en 1win</a>
-            </div>
-          `;
-        });
-    });
+    function logout() {
+      localStorage.removeItem('currentUser');
+      window.location.href = 'login.html';
+    }
   </script>
 </body>
 </html>
