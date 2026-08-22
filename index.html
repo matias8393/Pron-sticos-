@@ -8,7 +8,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #080e1e; color: #ffffff; }
     
-    /* LOGIN & PANEL ADMIN */
     .auth-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
     .card { background-color: #111a2e; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 400px; }
     h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; user-select: none; cursor: pointer; }
@@ -21,34 +20,33 @@
     .btn-sec { background: #475569; }
     .toggle { margin-top: 16px; font-size: 14px; color: #8d99ae; cursor: pointer; }
     
-    /* NAVEGACIÓN Y CABECERA RÉPLICA */
     .top-nav { background-color: #16223b; display: flex; overflow-x: auto; padding: 10px; gap: 10px; border-bottom: 1px solid #233354; }
-    .nav-item { flex: 0 0 auto; color: #a0aec0; text-decoration: none; font-size: 12px; text-align: center; padding: 6px 12px; border-radius: 6px; }
+    .nav-item { flex: 0 0 auto; color: #a0aec0; text-decoration: none; font-size: 12px; text-align: center; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
     .nav-item.active { background-color: #213254; color: #ffffff; font-weight: bold; }
     
     .sub-nav { background-color: #0f182c; display: flex; overflow-x: auto; padding: 8px; gap: 8px; font-size: 11px; text-transform: uppercase; font-weight: bold; }
-    .sub-item { flex: 0 0 auto; padding: 6px 10px; border-radius: 4px; color: #48cae4; background: #182642; text-decoration: none; }
+    .sub-item { flex: 0 0 auto; padding: 6px 10px; border-radius: 4px; color: #48cae4; background: #182642; text-decoration: none; cursor: pointer; }
     .sub-item.active { background-color: #10b981; color: white; }
 
-    /* CONTENIDO PRINCIPAL */
     .main-content { padding: 15px; max-width: 600px; margin: 0 auto; }
     .banner-text { font-size: 13px; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px; background: #111a2e; padding: 14px; border-radius: 10px; }
     
-    /* TARJETA DE ACUMULADA */
+    /* APUESTA DEL DÍA DESTACADA */
+    .daily-box { background: #111a2e; border: 1px solid #ffb703; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+    .daily-title { font-size: 14px; font-weight: bold; color: #ffb703; text-transform: uppercase; margin-bottom: 10px; text-align: center; }
+    
     .acc-card { background: #16223b; border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 1px solid #233354; }
     .acc-header { text-align: center; font-size: 15px; font-weight: bold; margin-bottom: 12px; color: #ffffff; }
-    .acc-date { font-size: 12px; color: #94a3b8; text-align: center; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+    .acc-date { font-size: 12px; color: #94a3b8; text-align: center; margin-bottom: 15px; }
     
-    .match-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #202d4a; font-size: 13px; }
+    .match-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #202d4a; font-size: 13px; cursor: pointer; }
     .match-time { color: #94a3b8; font-weight: bold; width: 45px; }
     .match-name { flex-grow: 1; margin: 0 10px; font-weight: 600; }
     .match-status { background: #10b981; color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
 
-    /* BOTÓN DE APUESTA */
     .bet-redirect-btn { background: #f59e0b; color: #000000; font-weight: bold; padding: 12px; border-radius: 8px; text-align: center; display: block; text-decoration: none; margin-top: 15px; font-size: 15px; }
     .odd-badge { background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; float: right; font-size: 13px; }
 
-    /* ESTILOS ADMIN USUARIOS */
     .admin-section-title { font-size: 14px; font-weight: bold; color: #48cae4; margin: 20px 0 8px 0; text-align: left; }
     .user-item { background: #131b2e; padding: 10px; border-radius: 8px; margin-bottom: 8px; text-align: left; border: 1px solid #2a385b; font-size: 12px; }
     .user-actions { display: flex; gap: 6px; margin-top: 6px; }
@@ -57,7 +55,7 @@
 </head>
 <body>
 
-  <!-- VISTA AUTENTICACIÓN -->
+  <!-- LOGIN -->
   <div class="auth-container" id="view-auth">
     <div class="card">
       <h1 id="auth-title" onclick="secretAdminClick()">Iniciar Sesión</h1>
@@ -69,73 +67,34 @@
     </div>
   </div>
 
-  <!-- VISTA PRINCIPAL (APLICACIÓN COMPLETA) -->
+  <!-- VISTA PRINCIPAL -->
   <div id="view-main" style="display:none;">
-    
-    <!-- MENÚ SUPERIOR -->
     <div class="top-nav">
-      <a href="#" class="nav-item">🔴 Fútbol Online</a>
-      <a href="#" class="nav-item active">⚽ Predicciones</a>
-      <a href="#" class="nav-item">🏆 Todas las Ligas</a>
-      <a href="#" class="nav-item">% Ofertas</a>
+      <div class="nav-item" onclick="openLink()">🔴 Fútbol Online</div>
+      <div class="nav-item active" onclick="switchCategory('predicciones', this)">⚽ Predicciones</div>
+      <div class="nav-item" onclick="openLink()">🏆 Todas las Ligas</div>
+      <div class="nav-item" onclick="openLink()">% Ofertas</div>
     </div>
 
-    <!-- SUBMENÚ CATEGORÍAS -->
     <div class="sub-nav">
-      <a href="#" class="sub-item">Apuestas Seguras</a>
-      <a href="#" class="sub-item">Ver en Línea</a>
-      <a href="#" class="sub-item active">Acumulada</a>
-      <a href="#" class="sub-item">Quiniela (1X2)</a>
+      <div class="sub-item active" onclick="switchSubTab('diarias', this)">Apuestas del Día</div>
+      <div class="sub-item" onclick="switchSubTab('acumulada', this)">Acumulada</div>
+      <div class="sub-item" onclick="switchSubTab('seguras', this)">Apuestas Seguras</div>
+      <div class="sub-item" onclick="switchSubTab('quiniela', this)">Quiniela (1X2)</div>
     </div>
 
-    <!-- CONTENIDO -->
     <div class="main-content">
-      
-      <div class="banner-text">
-        Acá están las predicciones de fútbol para <strong>Apuestas Combinadas de hoy</strong>. Encontrarás una para cada tipo de apuesta que ofrecemos aquí junto con las ganancias ofrecidas por las casas de apuestas.
+      <div class="banner-text" id="cat-description">
+        Predicciones exclusivas seleccionadas para el día de hoy.
       </div>
 
-      <!-- TARJETA ACUMULADA 1 -->
-      <div class="acc-card">
-        <div class="acc-header">Victoria Apuesta Acumulada de 5 elementos</div>
-        <div class="acc-date">📅 23 de ago.</div>
-
-        <div class="match-row">
-          <span class="match-time">13:30</span>
-          <span class="match-name">Club Brugge a ganar <span style="color:#8d99ae; font-weight:normal;">vs Cercle Brugge</span></span>
-          <span class="match-status">?</span>
-        </div>
-        <div class="match-row">
-          <span class="match-time">14:00</span>
-          <span class="match-name">Estrella Roja de Belgrado a ganar <span style="color:#8d99ae; font-weight:normal;">vs Čukarički</span></span>
-          <span class="match-status">?</span>
-        </div>
-        <div class="match-row">
-          <span class="match-time">15:00</span>
-          <span class="match-name">Panathinaikos a ganar <span style="color:#8d99ae; font-weight:normal;">vs Kifisia</span></span>
-          <span class="match-status">?</span>
-        </div>
-        <div class="match-row">
-          <span class="match-time">15:45</span>
-          <span class="match-name">Paris Saint-Germain a ganar <span style="color:#8d99ae; font-weight:normal;">vs Rennes</span></span>
-          <span class="match-status">?</span>
-        </div>
-        <div class="match-row">
-          <span class="match-time">16:30</span>
-          <span class="match-name">FC Porto a ganar <span style="color:#8d99ae; font-weight:normal;">vs Arouca</span></span>
-          <span class="match-status">?</span>
-        </div>
-
-        <a href="https://one-vv4322.com/casino?p=n2jc" target="_blank" class="bet-redirect-btn">
-          Apostar en Casino » <span class="odd-badge">2.74 *</span>
-        </a>
-      </div>
+      <div id="cards-container"></div>
 
       <button class="btn-danger" onclick="logout()" style="margin-bottom: 30px;">Cerrar Sesión</button>
     </div>
   </div>
 
-  <!-- VISTA ADMINISTRADOR -->
+  <!-- VISTA ADMIN -->
   <div class="auth-container" id="view-admin" style="display:none;">
     <div class="card">
       <h1>Panel de Administración</h1>
@@ -149,12 +108,110 @@
   </div>
 
   <script>
+    const BET_LINK = "https://one-vv4322.com/casino?p=n2jc";
     let isRegister = false;
     let clickCount = 0;
     let clickTimer = null;
     
     const ADMIN_EMAIL = "matiasmorel.05@gmail.com";
     const ADMIN_PIN = "Elhackers@10";
+
+    const contentData = {
+      diarias: {
+        desc: "Estas son las **Apuestas del Día** con el mayor rendimiento esperado para hoy.",
+        cards: [
+          {
+            title: "🔥 Apuesta Principal del Día",
+            odd: "1.99 *",
+            matches: [{ time: "HOY", name: "Internacional a ganar", vs: "vs Atlético Mineiro" }]
+          },
+          {
+            title: "⭐ Apuesta Secundaria del Día",
+            odd: "1.85 *",
+            matches: [{ time: "HOY", name: "Ceará a ganar", vs: "vs Londrina" }]
+          }
+        ]
+      },
+      acumulada: {
+        desc: "Predicciones de fútbol para **Apuestas Combinadas de hoy**.",
+        cards: [
+          {
+            title: "Victoria Apuesta Acumulada de 5 elementos",
+            odd: "2.74 *",
+            matches: [
+              { time: "13:30", name: "Club Brugge a ganar", vs: "vs Cercle Brugge" },
+              { time: "14:00", name: "Estrella Roja a ganar", vs: "vs Čukarički" },
+              { time: "15:00", name: "Panathinaikos a ganar", vs: "vs Kifisia" },
+              { time: "15:45", name: "PSG a ganar", vs: "vs Rennes" },
+              { time: "16:30", name: "FC Porto a ganar", vs: "vs Arouca" }
+            ]
+          }
+        ]
+      },
+      seguras: {
+        desc: "Selección de **Apuestas con alta probabilidad**.",
+        cards: [
+          {
+            title: "Apuesta Segura",
+            odd: "1.65 *",
+            matches: [{ time: "17:00", name: "Real Madrid a ganar", vs: "vs Getafe" }]
+          }
+        ]
+      },
+      quiniela: {
+        desc: "Predicciones en formato **Quiniela Tradicional (1X2)**.",
+        cards: [
+          {
+            title: "Quiniela 1X2",
+            odd: "3.20 *",
+            matches: [
+              { time: "15:00", name: "1 - Local (Inter)", vs: "vs Milan" },
+              { time: "17:30", name: "X - Empate", vs: "Bayern vs Dortmund" }
+            ]
+          }
+        ]
+      }
+    };
+
+    function openLink() { window.open(BET_LINK, '_blank'); }
+
+    function renderCategoryContent(tabKey) {
+      const category = contentData[tabKey] || contentData.diarias;
+      document.getElementById('cat-description').innerHTML = category.desc;
+      
+      const container = document.getElementById('cards-container');
+      container.innerHTML = '';
+
+      category.cards.forEach(card => {
+        let matchesHtml = '';
+        card.matches.forEach(m => {
+          matchesHtml += `
+            <div class="match-row" onclick="openLink()">
+              <span class="match-time">${m.time}</span>
+              <span class="match-name">${m.name} <span style="color:#8d99ae; font-weight:normal;">${m.vs}</span></span>
+              <span class="match-status">?</span>
+            </div>
+          `;
+        });
+
+        container.innerHTML += `
+          <div class="acc-card">
+            <div class="acc-header">${card.title}</div>
+            <div class="acc-date">📅 ${new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}.</div>
+            ${matchesHtml}
+            <a href="${BET_LINK}" target="_blank" class="bet-redirect-btn">
+              Apostar en Casino » <span class="odd-badge">${card.odd}</span>
+            </a>
+          </div>
+        `;
+      });
+    }
+
+    function switchSubTab(key, element) {
+      document.querySelectorAll('.sub-item').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+      renderCategoryContent(key);
+    }
 
     function secretAdminClick() {
       clickCount++;
@@ -188,6 +245,7 @@
       const currentUser = JSON.parse(localStorage.getItem('currentUser'));
       if (currentUser) {
         showView('view-main');
+        renderCategoryContent('diarias');
       } else {
         showView('view-auth');
       }
