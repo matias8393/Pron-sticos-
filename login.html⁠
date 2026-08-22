@@ -3,86 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acceso - Pronósticos</title>
+  <title>Panel de Administración</title>
   <style>
-    body { font-family: -apple-system, sans-serif; background: #0b132b; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 16px; box-sizing: border-box; }
-    .card { background: #1c2541; padding: 24px; border-radius: 12px; width: 100%; max-width: 350px; text-align: center; }
-    h2 { margin-top: 0; color: #48cae4; }
-    input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid #334155; background: #0b132b; color: white; box-sizing: border-box; }
-    button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 6px; border: none; background: #2ec4b6; color: white; font-weight: bold; cursor: pointer; }
-    .toggle { margin-top: 15px; font-size: 0.85rem; color: #a0aec0; cursor: pointer; }
-    #msg { margin-top: 10px; font-size: 0.85rem; color: #ffb703; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: white; padding: 2rem; }
+    .user-card { background: #1e293b; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    button { background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+    .approved { background: #64748b; cursor: default; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2 id="title">Iniciar Sesión</h2>
-    <input type="email" id="email" placeholder="Correo electrónico">
-    <input type="password" id="password" placeholder="Contraseña">
-    <button id="btn-action" onclick="handleSubmit()">Ingresar</button>
-    <div id="msg"></div>
-    <div class="toggle" onclick="toggleMode()" id="toggle-text">¿No tienes cuenta? Regístrate aquí</div>
-  </div>
+  <h1>Aprobar Usuarios</h1>
+  <div id="userList"></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <script>
+    function loadUsers() {
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const container = document.getElementById('userList');
+      container.innerHTML = users.length === 0 ? '<p>No hay usuarios registrados.</p>' : '';
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDAs8TnsLrIEUq5jcUOVybRt6uBWQsj1s0",
-      authDomain: "pronosticos-18dd2.firebaseapp.com",
-      projectId: "pronosticos-18dd2",
-      storageBucket: "pronosticos-18dd2.firebasestorage.app",
-      messagingSenderId: "468792609905",
-      appId: "1:468792609905:web:88180980f8be347ab8dfd0"
-    };
+      users.forEach((u, index) => {
+        const div = document.createElement('div');
+        div.className = 'user-card';
+        div.innerHTML = `
+          <span>${u.email} - <strong>${u.approved ? 'Aprobado' : 'Pendiente'}</strong></span>
+          ${!u.approved ? `<button onclick="approve(${index})">Aprobar</button>` : '<button class="approved" disabled>Aprobado</button>'}
+        `;
+        container.appendChild(div);
+      });
+    }
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    function approve(index) {
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      users[index].approved = true;
+      localStorage.setItem('users', JSON.stringify(users));
+      loadUsers();
+    }
 
-    let isLogin = true;
-
-    window.toggleMode = () => {
-      isLogin = !isLogin;
-      document.getElementById('title').innerText = isLogin ? 'Iniciar Sesión' : 'Registrarse';
-      document.getElementById('btn-action').innerText = isLogin ? 'Ingresar' : 'Crear Cuenta';
-      document.getElementById('toggle-text').innerText = isLogin ? '¿No tienes cuenta? Regístrate aquí' : '¿Ya tienes cuenta? Inicia sesión';
-      document.getElementById('msg').innerText = '';
-    };
-
-    window.handleSubmit = async () => {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const msg = document.getElementById('msg');
-      msg.innerText = "Procesando...";
-
-      try {
-        if (isLogin) {
-          const userCred = await signInWithEmailAndPassword(auth, email, password);
-          const userDoc = await getDoc(doc(db, "users", userCred.user.uid));
-          if (userDoc.exists() && userDoc.data().approved) {
-            window.location.href = "index.html";
-          } else {
-            await signOut(auth);
-            msg.innerText = "Tu cuenta está pendiente de aprobación por el administrador.";
-          }
-        } else {
-          const userCred = await createUserWithEmailAndPassword(auth, email, password);
-          await setDoc(doc(db, "users", userCred.user.uid), {
-            email: email,
-            approved: false,
-            createdAt: new Date().toISOString()
-          });
-          await signOut(auth);
-          msg.innerText = "Cuenta creada. Espera la aprobación del administrador.";
-          toggleMode();
-        }
-      } catch (err) {
-        msg.innerText = "Error: " + err.message;
-      }
-    };
+    loadUsers();
   </script>
 </body>
 </html>
