@@ -20,7 +20,7 @@
 </head>
 <body>
 
-  <!-- VISTA DE AUTH (LOGIN / REGISTRO) -->
+  <!-- VISTA DE AUTH -->
   <div class="card" id="view-auth">
     <h2 id="auth-title">Iniciar Sesión</h2>
     <input type="email" id="email" placeholder="Correo electrónico">
@@ -29,7 +29,7 @@
     <div class="toggle" onclick="toggleAuthMode()" id="toggle-auth">¿No tienes cuenta? Regístrate aquí</div>
   </div>
 
-  <!-- VISTA PRINCIPAL (PRONÓSTICOS) -->
+  <!-- VISTA PRINCIPAL -->
   <div class="card" id="view-main" style="display:none;">
     <h1>Pronósticos del Día</h1>
     <p>🎉 ¡Bienvenido a la plataforma de Pronósticos!</p>
@@ -46,6 +46,15 @@
 
   <script>
     let isRegister = false;
+
+    // Usuario administrador maestro predeterminado
+    function initData() {
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      if (!users.some(u => u.email === 'admin@admin.com')) {
+        users.push({ email: 'admin@admin.com', password: 'admin', approved: true });
+        localStorage.setItem('users', JSON.stringify(users));
+      }
+    }
 
     function showView(viewId) {
       document.getElementById('view-auth').style.display = 'none';
@@ -101,7 +110,7 @@
     function renderUsers() {
       const listContainer = document.getElementById('userList');
       const users = JSON.parse(localStorage.getItem('users') || '[]');
-      listContainer.innerHTML = users.length === 0 ? '<p>No hay usuarios.</p>' : '';
+      listContainer.innerHTML = '';
 
       users.forEach((user, index) => {
         const item = document.createElement('div');
@@ -128,6 +137,7 @@
       });
     }
 
+    initData();
     checkSession();
   </script>
 </body>
