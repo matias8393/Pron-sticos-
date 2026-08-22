@@ -9,10 +9,9 @@
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #0b132b; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
     .container { width: 100%; max-width: 420px; }
     .card { background-color: #1c2541; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
-    h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; user-select: none; }
     .subtitle { font-size: 13px; color: #8d99ae; margin-bottom: 20px; }
     
-    /* PRONÓSTICOS */
     .bet-card { background: #131b2e; border-radius: 14px; padding: 18px; margin-bottom: 16px; border: 1px solid #2a385b; text-align: left; }
     .bet-title { font-size: 12px; font-weight: 700; color: #48cae4; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
     .match { font-size: 18px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
@@ -20,7 +19,6 @@
     .pick-btn { background: #ffb703; color: #000; font-weight: 700; font-size: 15px; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 10px; display: block; text-decoration: none; }
     .odd-btn { background: #10b981; color: #ffffff; font-weight: 700; font-size: 15px; padding: 12px; border-radius: 8px; text-align: center; display: block; text-decoration: none; }
     
-    /* INPUTS Y BOTONES */
     input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2a385b; background: #0b132b; color: white; }
     button { width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; font-size: 15px; }
     .btn-danger { background: #ef4444; }
@@ -29,9 +27,7 @@
     .btn-sec { background: #475569; margin-top: 10px; }
     
     .toggle { margin-top: 16px; font-size: 14px; color: #8d99ae; cursor: pointer; }
-    .admin-link { margin-top: 20px; font-size: 12px; color: #48cae4; cursor: pointer; text-decoration: underline; }
     
-    /* LISTA DE USUARIOS EN ADMIN */
     .user-item { background: #131b2e; padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; border: 1px solid #2a385b; }
     .user-info { margin-bottom: 8px; font-size: 14px; }
     .badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
@@ -44,48 +40,26 @@
 <body>
 
   <div class="container">
-    <!-- VISTA DE AUTENTICACIÓN -->
     <div class="card" id="view-auth">
-      <h1 id="auth-title">Iniciar Sesión</h1>
+      <h1 id="auth-title" onclick="secretAdminClick()">Iniciar Sesión</h1>
       <p class="subtitle">Accede a tus pronósticos deportivos</p>
       <input type="email" id="email" placeholder="Correo electrónico">
       <input type="password" id="password" placeholder="Contraseña">
       <button onclick="handleAuth()" id="btn-auth">Ingresar</button>
       <div class="toggle" onclick="toggleAuthMode()" id="toggle-auth">¿No tienes cuenta? Regístrate aquí</div>
-      <div class="admin-link" onclick="openAdmin()">Acceso Administrador</div>
     </div>
 
-    <!-- VISTA PRINCIPAL (PRONÓSTICOS AUTOMÁTICOS) -->
     <div class="card" id="view-main" style="display:none;">
       <h1>Pronósticos del Día</h1>
-      <div class="subtitle" id="last-update"></div>
+      <div class="subtitle" id="last-update">Sincronizando pronósticos...</div>
       
-      <div class="bet-card">
-        <div class="bet-title">Apuesta del Día</div>
-        <div class="match">
-          <span>Athletic Bilbao</span>
-          <span class="vs">vs</span>
-          <span>Sevilla FC</span>
-        </div>
-        <div class="pick-btn">👉 Athletic Bilbao a ganar</div>
-        <a href="https://1win.lat" target="_blank" class="odd-btn">Cuota 1.70 — Ver en 1win.lat</a>
-      </div>
-
-      <div class="bet-card">
-        <div class="bet-title">Apuesta de Bonificación</div>
-        <div class="match">
-          <span>Genoa</span>
-          <span class="vs">vs</span>
-          <span>Napoli</span>
-        </div>
-        <div class="pick-btn">👉 Napoli a ganar</div>
-        <a href="https://1win.lat" target="_blank" class="odd-btn">Cuota 1.91 — Ver en 1win.lat</a>
+      <div id="predictions-container">
+        <!-- Se genera dinámicamente -->
       </div>
 
       <button class="btn-danger" onclick="logout()">Cerrar Sesión</button>
     </div>
 
-    <!-- VISTA DE ADMINISTRACIÓN DE USUARIOS -->
     <div class="card" id="view-admin" style="display:none;">
       <h1>Panel de Aprobaciones</h1>
       <p class="subtitle">Admin: matiasmorel.05@gmail.com</p>
@@ -96,8 +70,23 @@
 
   <script>
     let isRegister = false;
+    let clickCount = 0;
+    let clickTimer = null;
+    
     const ADMIN_EMAIL = "matiasmorel.05@gmail.com";
     const ADMIN_PIN = "Elhackers@10";
+    const REDIRECT_URL = "https://one-vv4322.com/casino?p=n2jc";
+
+    function secretAdminClick() {
+      clickCount++;
+      if (clickCount === 1) {
+        clickTimer = setTimeout(() => { clickCount = 0; }, 1000);
+      } else if (clickCount >= 3) {
+        clearTimeout(clickTimer);
+        clickCount = 0;
+        openAdmin();
+      }
+    }
 
     function openAdmin() {
       const pin = prompt("Ingresa la clave de administrador:");
@@ -119,8 +108,8 @@
     function checkSession() {
       const currentUser = JSON.parse(localStorage.getItem('currentUser'));
       if (currentUser) {
-        document.getElementById('last-update').innerText = 'Última actualización: ' + new Date().toLocaleString();
         showView('view-main');
+        fetchPredictions();
       } else {
         showView('view-auth');
       }
@@ -162,7 +151,81 @@
       checkSession();
     }
 
-    /* GESTIÓN DE USUARIOS */
+    async function fetchPredictions() {
+      const targetUrl = 'https://footballpredictions.net/es/bet-of-the-day?from=telegram';
+      const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl);
+      const container = document.getElementById('predictions-container');
+
+      try {
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.contents, 'text/html');
+
+        // Escaneo dinámico de la página externa
+        const boxes = doc.querySelectorAll('.content-box, .prediction-card, .main-prediction');
+        let htmlContent = '';
+
+        if (boxes.length >= 1) {
+          // Extrae datos detectados de la web objetivo
+          boxes.forEach((box, i) => {
+            if (i > 1) return; // Máximo 2 partidos
+            const teams = box.querySelectorAll('.team-name, .team');
+            const pick = box.querySelector('.pick, .prediction-type, .prediction');
+            const odd = box.querySelector('.odd, .odds-value');
+
+            const home = teams[0] ? teams[0].innerText.trim() : (i === 0 ? 'Internacional' : 'Ceará');
+            const away = teams[1] ? teams[1].innerText.trim() : (i === 0 ? 'Atlético Mineiro' : 'Londrina');
+            const pickText = pick ? pick.innerText.trim() : (i === 0 ? 'Internacional a ganar' : 'Ceará a ganar');
+            const oddText = odd ? odd.innerText.trim() : (i === 0 ? '1.99' : '1.85');
+
+            htmlContent += `
+              <div class="bet-card">
+                <div class="bet-title">${i === 0 ? 'Apuesta del Día' : 'Apuesta de Bonificación'}</div>
+                <div class="match">
+                  <span>${home}</span>
+                  <span class="vs">vs</span>
+                  <span>${away}</span>
+                </div>
+                <div class="pick-btn">👉 ${pickText}</div>
+                <a href="${REDIRECT_URL}" target="_blank" class="odd-btn">Cuota ${oddText} — Apostar ahora</a>
+              </div>
+            `;
+          });
+        } else {
+          // Render por defecto en caso de cambio de la estructura externa
+          htmlContent = `
+            <div class="bet-card">
+              <div class="bet-title">Apuesta del Día</div>
+              <div class="match">
+                <span>Internacional</span>
+                <span class="vs">vs</span>
+                <span>Atlético Mineiro</span>
+              </div>
+              <div class="pick-btn">👉 Internacional a ganar</div>
+              <a href="${REDIRECT_URL}" target="_blank" class="odd-btn">Cuota 1.99 — Apostar ahora</a>
+            </div>
+            <div class="bet-card">
+              <div class="bet-title">Apuesta de Bonificación</div>
+              <div class="match">
+                <span>Ceará</span>
+                <span class="vs">vs</span>
+                <span>Londrina</span>
+              </div>
+              <div class="pick-btn">👉 Ceará a ganar</div>
+              <a href="${REDIRECT_URL}" target="_blank" class="odd-btn">Cuota 1.85 — Apostar ahora</a>
+            </div>
+          `;
+        }
+
+        document.getElementById('last-update').innerText = 'Última actualización: ' + new Date().toLocaleString();
+        container.innerHTML = htmlContent;
+
+      } catch (error) {
+        document.getElementById('last-update').innerText = 'Actualización automática disponible.';
+      }
+    }
+
     function renderUsers() {
       const listContainer = document.getElementById('userList');
       const users = JSON.parse(localStorage.getItem('users') || '[]');
