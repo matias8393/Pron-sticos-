@@ -3,63 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Admin - Pronósticos</title>
+  <title>Panel de Administración</title>
   <style>
-    body { font-family: -apple-system, sans-serif; background: #0b132b; color: white; padding: 20px; max-width: 600px; margin: 0 auto; }
-    h1 { color: #48cae4; text-align: center; }
-    .user-card { background: #1c2541; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-    button { padding: 8px 12px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
-    .btn-approve { background: #2ec4b6; color: white; }
-    .btn-approved { background: #64748b; color: #cbd5e1; cursor: default; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: white; padding: 2rem; }
+    .user-card { background: #1e293b; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    button { background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+    .approved { background: #64748b; cursor: default; }
   </style>
 </head>
 <body>
-  <h1>Panel de Administración</h1>
-  <div id="user-list">Cargando usuarios...</div>
+  <h1>Aprobar Usuarios</h1>
+  <div id="userList"></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <script>
+    function loadUsers() {
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const container = document.getElementById('userList');
+      container.innerHTML = users.length === 0 ? '<p>No hay usuarios registrados.</p>' : '';
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDAs8TnsLrIEUq5jcUOVybRt6uBWQsj1s0",
-      authDomain: "pronosticos-18dd2.firebaseapp.com",
-      projectId: "pronosticos-18dd2",
-      storageBucket: "pronosticos-18dd2.firebasestorage.app",
-      messagingSenderId: "468792609905",
-      appId: "1:468792609905:web:88180980f8be347ab8dfd0"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    async function loadUsers() {
-      const container = document.getElementById('user-list');
-      const querySnapshot = await getDocs(collection(db, "users"));
-      container.innerHTML = "";
-
-      querySnapshot.forEach((userDoc) => {
-        const data = userDoc.data();
+      users.forEach((u, index) => {
         const div = document.createElement('div');
         div.className = 'user-card';
         div.innerHTML = `
-          <div>
-            <strong>${data.email}</strong><br>
-            <small>Estado: ${data.approved ? 'Aprobado' : 'Pendiente'}</small>
-          </div>
-          ${data.approved 
-            ? `<button class="btn-approved" disabled>Aprobado</button>` 
-            : `<button class="btn-approve" onclick="approveUser('${userDoc.id}')">Aprobar Acceso</button>`
-          }
+          <span>${u.email} - <strong>${u.approved ? 'Aprobado' : 'Pendiente'}</strong></span>
+          ${!u.approved ? `<button onclick="approve(${index})">Aprobar</button>` : '<button class="approved" disabled>Aprobado</button>'}
         `;
         container.appendChild(div);
       });
     }
 
-    window.approveUser = async (uid) => {
-      await updateDoc(doc(db, "users", uid), { approved: true });
+    function approve(index) {
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      users[index].approved = true;
+      localStorage.setItem('users', JSON.stringify(users));
       loadUsers();
-    };
+    }
 
     loadUsers();
   </script>
