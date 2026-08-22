@@ -6,41 +6,28 @@
   <title>Pronósticos del Día</title>
   <style>
     body { font-family: system-ui, sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-    .card { background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
+    .card { background: #1e293b; padding: 2rem; border-radius: 12px; text-align: center; max-width: 400px; width: 90%; }
     button { background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-top: 1rem; }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>Pronósticos del Día</h1>
-    <p id="status">Verificando sesión...</p>
-    <div id="content" style="display:none;">
-      <p>🎉 ¡Bienvenido! Aquí están los pronósticos de hoy.</p>
+    <div id="content">
+      <p>🎉 ¡Bienvenido a la plataforma de Pronósticos!</p>
       <button onclick="logout()">Cerrar Sesión</button>
     </div>
   </div>
 
   <script>
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-
     if (!currentUser) {
-      window.location.href = 'login.html';
-    } else {
-      const validUser = users.find(u => u.email === currentUser.email && u.approved);
-      if (!validUser) {
-        alert('Tu cuenta aún no ha sido aprobada por un administrador.');
-        localStorage.removeItem('currentUser');
-        window.location.href = 'login.html';
-      } else {
-        document.getElementById('status').style.display = 'none';
-        document.getElementById('content').style.display = 'block';
-      }
+      window.location.href = './login.html';
     }
 
     function logout() {
       localStorage.removeItem('currentUser');
-      window.location.href = 'login.html';
+      window.location.href = './login.html';
     }
   </script>
 </body>
