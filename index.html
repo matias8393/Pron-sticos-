@@ -21,17 +21,17 @@
 </head>
 <body>
 
-  <!-- VISTA DE ACCESO Y REGISTRO -->
+  <!-- VISTA DE AUTH -->
   <div class="card" id="view-auth">
     <h2 id="auth-title">Iniciar Sesión</h2>
     <input type="email" id="email" placeholder="Correo electrónico">
     <input type="password" id="password" placeholder="Contraseña">
     <button onclick="handleAuth()" id="btn-auth">Ingresar</button>
     <div class="toggle" onclick="toggleAuthMode()" id="toggle-auth">¿No tienes cuenta? Regístrate aquí</div>
-    <div class="admin-link" onclick="showView('view-admin'); renderUsers();">Acceso Administrador</div>
+    <div class="admin-link" onclick="openAdmin()">Acceso Administrador</div>
   </div>
 
-  <!-- VISTA PRINCIPAL (PRONÓSTICOS) -->
+  <!-- VISTA PRINCIPAL -->
   <div class="card" id="view-main" style="display:none;">
     <h1>Pronósticos del Día</h1>
     <p>🎉 ¡Bienvenido a la plataforma de Pronósticos!</p>
@@ -40,13 +40,26 @@
 
   <!-- VISTA DE ADMINISTRACIÓN -->
   <div class="card" id="view-admin" style="display:none;">
-    <h2>Panel de Aprobaciones</h2>
+    <h2>Aprobar Usuarios</h2>
+    <p style="font-size: 0.85rem; color: #94a3b8;">Admin: matiasmorel.05@gmail.com</p>
     <div id="userList"></div>
     <button class="btn-sec" onclick="showView('view-auth')">Volver al Login</button>
   </div>
 
   <script>
     let isRegister = false;
+    const ADMIN_EMAIL = "matiasmorel.05@gmail.com";
+    const ADMIN_PIN = "Elhackers@10";
+
+    function openAdmin() {
+      const pin = prompt("Ingresa la clave de administrador:");
+      if (pin === ADMIN_PIN) {
+        showView('view-admin');
+        renderUsers();
+      } else if (pin !== null) {
+        alert("Clave incorrecta");
+      }
+    }
 
     function showView(viewId) {
       document.getElementById('view-auth').style.display = 'none';
@@ -80,14 +93,22 @@
 
       if (isRegister) {
         if (users.some(u => u.email === email)) return alert('El usuario ya existe');
-        users.push({ email, password, approved: false });
+        
+        // Si se registra con el correo de admin, se aprueba automáticamente
+        const isApproved = (email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+        users.push({ email, password, approved: isApproved });
         localStorage.setItem('users', JSON.stringify(users));
-        alert('Registro exitoso. Solicita aprobación al administrador.');
+        
+        if (isApproved) {
+          alert('Cuenta de administrador creada y aprobada automáticamente.');
+        } else {
+          alert('Registro exitoso. Solicita aprobación al administrador.');
+        }
         toggleAuthMode();
       } else {
         const user = users.find(u => u.email === email && u.password === password);
         if (!user) return alert('Credenciales incorrectas');
-        if (!user.approved) return alert('Tu cuenta aún no ha sido aprobada por el administrador');
+        if (!user.approved) return alert('Tu cuenta aún no ha sido aprobada');
         
         localStorage.setItem('currentUser', JSON.stringify(user));
         checkSession();
