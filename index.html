@@ -12,6 +12,7 @@
     h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; user-select: none; cursor: pointer; }
     .subtitle { font-size: 13px; color: #8d99ae; margin-bottom: 20px; }
     
+    /* TARJETAS DE APUESTAS */
     .bet-card { background: #131b2e; border-radius: 14px; padding: 18px; margin-bottom: 16px; border: 1px solid #2a385b; text-align: left; }
     .bet-title { font-size: 12px; font-weight: 700; color: #48cae4; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
     .match { font-size: 18px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
@@ -19,14 +20,25 @@
     .pick-btn { background: #ffb703; color: #000; font-weight: 700; font-size: 15px; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 10px; display: block; text-decoration: none; }
     .odd-btn { background: #10b981; color: #ffffff; font-weight: 700; font-size: 15px; padding: 12px; border-radius: 8px; text-align: center; display: block; text-decoration: none; }
     
+    /* INPUTS Y BOTONES */
     input { width: 100%; padding: 10px; margin: 6px 0; border-radius: 8px; border: 1px solid #2a385b; background: #0b132b; color: white; font-size: 14px; }
     button { width: 100%; background: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; font-size: 15px; }
     .btn-danger { background: #ef4444; }
+    .btn-warning { background: #f59e0b; }
     .btn-success { background: #10b981; }
     .btn-sec { background: #475569; margin-top: 10px; }
     
     .toggle { margin-top: 16px; font-size: 14px; color: #8d99ae; cursor: pointer; }
-    .admin-section-title { font-size: 14px; font-weight: bold; color: #48cae4; margin: 15px 0 8px 0; text-align: left; }
+    .admin-section-title { font-size: 14px; font-weight: bold; color: #48cae4; margin: 20px 0 8px 0; text-align: left; }
+    
+    /* LISTA DE USUARIOS */
+    .user-item { background: #131b2e; padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: left; border: 1px solid #2a385b; }
+    .user-info { margin-bottom: 8px; font-size: 14px; }
+    .badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+    .approved { background: #10b981; color: white; }
+    .pending { background: #f59e0b; color: black; }
+    .user-actions { display: flex; gap: 6px; }
+    .user-actions button { margin-top: 0; padding: 6px; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -74,11 +86,12 @@
       <button class="btn-danger" onclick="logout()">Cerrar Sesión</button>
     </div>
 
-    <!-- VISTA EXCLUSIVA ADMINISTRADOR -->
+    <!-- VISTA ADMINISTRADOR -->
     <div class="card" id="view-admin" style="display:none;">
-      <h1>Panel de Apuestas</h1>
-      <p class="subtitle">Modifica las apuestas visibles</p>
+      <h1>Panel de Administración</h1>
+      <p class="subtitle">Gestión de apuestas y aprobaciones</p>
 
+      <!-- SECCIÓN 1: APUESTAS -->
       <div class="admin-section-title">1. Apuesta Principal</div>
       <input type="text" id="edit-team1-a" placeholder="Equipo Local">
       <input type="text" id="edit-team2-a" placeholder="Equipo Visitante">
@@ -91,7 +104,12 @@
       <input type="text" id="edit-pick-b" placeholder="Pronóstico (Ej: Ganador Ceará)">
       <input type="text" id="edit-odd-b" placeholder="Cuota (Ej: 1.85)">
 
-      <button class="btn-success" onclick="saveBets()">Guardar y Publicar</button>
+      <button class="btn-success" onclick="saveBets()">Guardar y Publicar Apuestas</button>
+
+      <!-- SECCIÓN 2: USUARIOS -->
+      <div class="admin-section-title">3. Aprobación de Usuarios</div>
+      <div id="userList"></div>
+
       <button class="btn-sec" onclick="showView('view-auth')">Volver al Inicio</button>
     </div>
   </div>
@@ -101,6 +119,7 @@
     let clickCount = 0;
     let clickTimer = null;
     
+    const ADMIN_EMAIL = "matiasmorel.05@gmail.com";
     const ADMIN_PIN = "Elhackers@10";
 
     const defaultBets = {
@@ -124,6 +143,7 @@
       if (pin === ADMIN_PIN) {
         showView('view-admin');
         loadBetForms();
+        renderUsers();
       } else if (pin !== null) {
         alert("Clave incorrecta");
       }
@@ -163,13 +183,15 @@
 
       if (isRegister) {
         if (users.some(u => u.email === email)) return alert('El usuario ya existe');
-        users.push({ email, password });
+        const isApproved = (email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+        users.push({ email, password, approved: isApproved });
         localStorage.setItem('users', JSON.stringify(users));
-        alert('Registro exitoso. Ahora puedes ingresar.');
+        alert(isApproved ? 'Cuenta de administrador lista.' : 'Registro exitoso. Solicita aprobación al administrador.');
         toggleAuthMode();
       } else {
         const user = users.find(u => u.email === email && u.password === password);
         if (!user) return alert('Credenciales incorrectas');
+        if (!user.approved) return alert('Tu cuenta aún no ha sido aprobada');
         
         localStorage.setItem('currentUser', JSON.stringify(user));
         checkSession();
@@ -181,6 +203,7 @@
       checkSession();
     }
 
+    /* GESTIÓN DE APUESTAS */
     function getBets() {
       return JSON.parse(localStorage.getItem('currentBets')) || defaultBets;
     }
@@ -225,6 +248,47 @@
 
       localStorage.setItem('currentBets', JSON.stringify(updatedBets));
       alert('¡Pronósticos actualizados correctamente!');
+    }
+
+    /* GESTIÓN DE USUARIOS */
+    function renderUsers() {
+      const listContainer = document.getElementById('userList');
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      listContainer.innerHTML = users.length === 0 ? '<p class="subtitle">No hay usuarios registrados.</p>' : '';
+
+      users.forEach((user, index) => {
+        const item = document.createElement('div');
+        item.className = 'user-item';
+        item.innerHTML = `
+          <div class="user-info">
+            <strong>${user.email}</strong><br>
+            <span class="badge ${user.approved ? 'approved' : 'pending'}">${user.approved ? 'Aprobado' : 'Pendiente'}</span>
+          </div>
+          <div class="user-actions">
+            ${user.approved 
+              ? `<button class="btn-warning" onclick="toggleApprove(${index}, false)">Desaprobar</button>`
+              : `<button class="btn-success" onclick="toggleApprove(${index}, true)">Aprobar</button>`
+            }
+            <button class="btn-danger" onclick="deleteUser(${index})">Eliminar</button>
+          </div>
+        `;
+        listContainer.appendChild(item);
+      });
+    }
+
+    function toggleApprove(index, status) {
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      users[index].approved = status;
+      localStorage.setItem('users', JSON.stringify(users));
+      renderUsers();
+    }
+
+    function deleteUser(index) {
+      if (!confirm("¿Seguro que deseas eliminar este usuario?")) return;
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      users.splice(index, 1);
+      localStorage.setItem('users', JSON.stringify(users));
+      renderUsers();
     }
 
     checkSession();
