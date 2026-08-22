@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Pronósticos</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; background: #0b132b; color: white; padding: 20px; max-width: 600px; margin: 0 auto; }
+    h1 { color: #48cae4; text-align: center; }
+    .user-card { background: #1c2541; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    button { padding: 8px 12px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; }
+    .btn-approve { background: #2ec4b6; color: white; }
+    .btn-approved { background: #64748b; color: #cbd5e1; cursor: default; }
+  </style>
+</head>
+<body>
+  <h1>Panel de Administración</h1>
+  <div id="user-list">Cargando usuarios...</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDAs8TnsLrIEUq5jcUOVybRt6uBWQsj1s0",
+      authDomain: "pronosticos-18dd2.firebaseapp.com",
+      projectId: "pronosticos-18dd2",
+      storageBucket: "pronosticos-18dd2.firebasestorage.app",
+      messagingSenderId: "468792609905",
+      appId: "1:468792609905:web:88180980f8be347ab8dfd0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadUsers() {
+      const container = document.getElementById('user-list');
+      const querySnapshot = await getDocs(collection(db, "users"));
+      container.innerHTML = "";
+
+      querySnapshot.forEach((userDoc) => {
+        const data = userDoc.data();
+        const div = document.createElement('div');
+        div.className = 'user-card';
+        div.innerHTML = `
+          <div>
+            <strong>${data.email}</strong><br>
+            <small>Estado: ${data.approved ? 'Aprobado' : 'Pendiente'}</small>
+          </div>
+          ${data.approved 
+            ? `<button class="btn-approved" disabled>Aprobado</button>` 
+            : `<button class="btn-approve" onclick="approveUser('${userDoc.id}')">Aprobar Acceso</button>`
+          }
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    window.approveUser = async (uid) => {
+      await updateDoc(doc(db, "users", uid), { approved: true });
+      loadUsers();
+    };
+
+    loadUsers();
+  </script>
+</body>
+</html>
