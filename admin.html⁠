@@ -3,43 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Administración</title>
+  <title>Panel de Administración - Pronósticos</title>
   <style>
-    body { font-family: system-ui, sans-serif; background: #0f172a; color: white; padding: 2rem; }
-    .user-card { background: #1e293b; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
-    button { background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
-    .approved { background: #64748b; cursor: default; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: white; padding: 2rem; margin: 0; display: flex; flex-direction: column; align-items: center; }
+    .card { background: #1e293b; padding: 1.5rem; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    h2 { text-align: center; margin-bottom: 1.5rem; }
+    .user-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; border-bottom: 1px solid #334155; }
+    .user-item:last-child { border-bottom: none; }
+    .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+    .approved { background: #10b981; color: white; }
+    .pending { background: #f59e0b; color: white; }
+    button { background: #2563eb; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #1d4ed8; }
+    .empty { text-align: center; color: #94a3b8; margin: 1rem 0; }
   </style>
 </head>
 <body>
-  <h1>Aprobar Usuarios</h1>
-  <div id="userList"></div>
+  <div class="card">
+    <h2>Administración de Usuarios</h2>
+    <div id="userList"></div>
+  </div>
 
   <script>
-    function loadUsers() {
+    function renderUsers() {
+      const listContainer = document.getElementById('userList');
       const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const container = document.getElementById('userList');
-      container.innerHTML = users.length === 0 ? '<p>No hay usuarios registrados.</p>' : '';
 
-      users.forEach((u, index) => {
-        const div = document.createElement('div');
-        div.className = 'user-card';
-        div.innerHTML = `
-          <span>${u.email} - <strong>${u.approved ? 'Aprobado' : 'Pendiente'}</strong></span>
-          ${!u.approved ? `<button onclick="approve(${index})">Aprobar</button>` : '<button class="approved" disabled>Aprobado</button>'}
-        `;
-        container.appendChild(div);
+      if (users.length === 0) {
+        listContainer.innerHTML = '<p class="empty">No hay usuarios registrados aún.</p>';
+        return;
+      }
+
+      listContainer.innerHTML = '';
+      users.forEach((user, index) => {
+        const item = document.createElement('div');
+        item.className = 'user-item';
+
+        const info = document.createElement('div');
+        info.innerHTML = `<strong>${user.email}</strong><br><span class="badge ${user.approved ? 'approved' : 'pending'}">${user.approved ? 'Aprobado' : 'Pendiente'}</span>`;
+
+        item.appendChild(info);
+
+        if (!user.approved) {
+          const btn = document.createElement('button');
+          btn.innerText = 'Aprobar';
+          btn.onclick = () => approveUser(index);
+          item.appendChild(btn);
+        }
+
+        listContainer.appendChild(item);
       });
     }
 
-    function approve(index) {
+    function approveUser(index) {
       let users = JSON.parse(localStorage.getItem('users') || '[]');
       users[index].approved = true;
       localStorage.setItem('users', JSON.stringify(users));
-      loadUsers();
+      renderUsers();
     }
 
-    loadUsers();
+    renderUsers();
   </script>
 </body>
 </html>
