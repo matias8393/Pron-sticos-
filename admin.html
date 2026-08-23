@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Pronósticos</title>
+    <style>
+        body { font-family: sans-serif; background-color: #0b0f19; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { max-width: 500px; width: 100%; background: #1e293b; padding: 25px; border-radius: 12px; box-sizing: border-box; }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; box-sizing: border-box; }
+        input { background: #0f172a; color: #fff; }
+        button { background: #2563eb; color: #fff; border: none; font-weight: bold; cursor: pointer; }
+        .hidden { display: none; }
+        .row { display: flex; justify-content: space-between; background: #0f172a; padding: 10px; margin: 5px 0; border-radius: 6px; align-items: center; }
+        .btn-aprove { background: #22c55e; width: auto; padding: 6px 12px; margin: 0; }
+        .btn-delete { background: #ef4444; width: auto; padding: 6px 12px; margin: 0; }
+        .error { color: #ef4444; } .warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loginSec">
+            <h2>🔐 ADMIN LOGIN</h2>
+            <form id="adminForm">
+                <input type="email" id="correo" placeholder="Correo" required>
+                <input type="password" id="pass" placeholder="Contraseña" required>
+                <button type="submit">Ingresar</button>
+            </form>
+            <div id="msgLogin"></div>
+        </div>
+        <div id="panelSec" class="hidden">
+            <h2>⚙️ PANEL</h2>
+            <h3>⏳ Pendientes</h3>
+            <div id="pendientes"></div>
+            <h3 style="margin-top:20px;">✅ Aprobados</h3>
+            <div id="aprobados"></div>
+            <button onclick="location.reload()" style="background:#475569; margin-top:20px;">Cerrar Sesión</button>
+        </div>
+    </div>
+    <script>
+        const API_URL = "https://backend-pronosticos.onrender.com";
+        document.getElementById('adminForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('msgLogin');
+            const res = await fetch(`${API_URL}/admin-login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ correo: document.getElementById('correo').value, password: document.getElementById('pass').value })
+            });
+            if (res.ok) {
+                document.getElementById('loginSec').classList.add('hidden');
+                document.getElementById('panelSec').classList.remove('hidden');
+                cargarDatos();
+            } else {
+                msg.textContent = "Credenciales incorrectas"; msg.className = "error";
+            }
+        });
+
+        async function cargarDatos() {
+            const pRes = await fetch(`${API_URL}/pendientes`);
+            const pendientes = await pRes.json();
+            document.getElementById('pendientes').innerHTML = pendientes.length ? pendientes.map(u => `<div class="row"><span>${u}</span><button class="btn-aprove" onclick="accion('aprobar','${u}')">Aprobar</button></div>`).join('') : '<p style="color:#94a3b8">No hay pendientes</p>';
+
+            const aRes = await fetch(`${API_URL}/aprobados`);
+            const aprobados = await aRes.json();
+            document.getElementById('aprobados').innerHTML = aprobados.length ? aprobados.map(u => `<div class="row"><span>${u}</span><button class="btn-delete" onclick="accion('eliminar','${u}')">Eliminar</button></div>`).join('') : '<p style="color:#94a3b8">No hay aprobados</p>';
+        }
+
+        async function accion(endpoint, usuario) {
+            await fetch(`${API_URL}/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario })
+            });
+            cargarDatos();
+        }
+    </script>
+</body>
+</html>
