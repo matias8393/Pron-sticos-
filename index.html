@@ -82,21 +82,20 @@
     </div>
 
     <script>
-        const API_URL = "https://backend-pronosticos.onrender.com";
-
         const form = document.getElementById('registroForm');
         const mensajeDiv = document.getElementById('mensaje');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            mensajeDiv.textContent = "Conectando con el servidor (si está dormido puede tardar unos segundos)...";
+            mensajeDiv.textContent = "Conectando con el servidor...";
             mensajeDiv.className = "warning";
 
             const usuario = document.getElementById('usuario').value;
             const password = document.getElementById('password').value;
 
             try {
-                const response = await fetch(`${API_URL}/registrar`, {
+                // URL directa escrita dentro del fetch para evitar cualquier error de variable
+                const response = await fetch("https://backend-pronosticos.onrender.com/registrar", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -115,7 +114,6 @@
                     mensajeDiv.className = "error";
                 }
             } catch (error) {
-                // Aquí veremos exactamente el error técnico si vuelve a fallar
                 mensajeDiv.textContent = "Error técnico: " + error.message;
                 mensajeDiv.className = "error";
             }
