@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pronósticos Deportivos - IA</title>
+    <title>Acceso - Pronósticos IA</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -11,16 +11,64 @@
             color: #ffffff;
             margin: 0;
             padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .container {
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 400px;
+            width: 100%;
+        }
+        .login-card {
+            background-color: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid #334155;
         }
         h1 {
             text-align: center;
             color: #38bdf8;
-            font-size: 24px;
-            margin-bottom: 25px;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .error {
+            color: #ef4444;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+            display: none;
+        }
+        /* Estilos del panel una vez logueado */
+        #panel-contenido {
+            display: none;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
         }
         .card {
             background-color: #1e293b;
@@ -30,64 +78,81 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             border: 1px solid #334155;
         }
-        .match-time {
-            font-size: 12px;
-            color: #94a3b8;
-            margin-bottom: 6px;
+        .match-time { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
+        .match-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+        .prediction { color: #4ade80; font-weight: 600; margin-bottom: 12px; }
+        .btn-apostar {
+            display: block; width: 100%; background-color: #2563eb; color: white;
+            text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; box-sizing: border-box;
         }
-        .match-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .prediction {
-            color: #4ade80;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-        .btn {
-            display: block;
-            width: 100%;
-            background-color: #2563eb;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            box-sizing: border-box;
-        }
-        .loading {
-            text-align: center;
-            color: #94a3b8;
-            margin-top: 40px;
-        }
+        .logout-btn { background-color: #ef4444; width: auto; padding: 6px 12px; font-size: 12px; float: right; margin-top: -5px;}
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>⚽ PRONÓSTICOS DE HOY</h1>
+    <!-- PANTALLA DE LOGIN -->
+    <div class="container" id="login-container">
+        <div class="login-card">
+            <h1>⚽ ACCESO RESTRINGIDO</h1>
+            <input type="text" id="usuario" placeholder="Usuario">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button onclick="intentarLogin()">Ingresar</button>
+            <p id="msg-error" class="error">Credenciales incorrectas</p>
+        </div>
+    </div>
+
+    <!-- PANEL DE PRONÓSTICOS (Oculto hasta iniciar sesión) -->
+    <div id="panel-contenido">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: #38bdf8; margin: 0;">⚽ PRONÓSTICOS DE LA IA</h2>
+            <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+        </div>
         <div id="pronosticos-container">
-            <div class="loading">Cargando pronósticos actualizados de la IA...</div>
+            <div style="text-align: center; color: #94a3b8;">Cargando pronósticos...</div>
         </div>
     </div>
 
     <script>
-        // Enlace directo al backend en Render
         const API_URL = "https://backend-pronosticos.onrender.com/api/pronosticos";
 
-        async function cargarPronosticos() {
+        // Revisar si ya había iniciado sesión antes en este navegador
+        window.onload = function() {
+            if (localStorage.getItem("auth") === "true") {
+                mostrarPanel();
+            }
+        };
+
+        function intentarLogin() {
+            const u = document.getElementById("usuario").value;
+            const p = document.getElementById("password").value;
+
+            // Tus datos de acceso secreto
+            if (u === "admin" && p === "admin123") {
+                localStorage.setItem("auth", "true");
+                mostrarPanel();
+            } else {
+                document.getElementById("msg-error").style.display = "block";
+            }
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem("auth");
+            location.reload();
+        }
+
+        async function mostrarPanel() {
+            document.getElementById("login-container").style.display = "none";
+            document.getElementById("panel-contenido").style.display = "block";
+
             const container = document.getElementById("pronosticos-container");
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) throw new Error("Error en el servidor");
+                if (!response.ok) throw new Error("Error en servidor");
                 const data = await response.json();
 
                 container.innerHTML = "";
-
                 if (!data || data.length === 0) {
-                    container.innerHTML = "<div class='loading'>No hay partidos programados para hoy.</div>";
+                    container.innerHTML = "<div style='text-align: center; color: #94a3b8;'>No hay partidos disponibles.</div>";
                     return;
                 }
 
@@ -98,18 +163,14 @@
                         <div class="match-time">⏰ ${item.hora || 'MAÑANA'}</div>
                         <div class="match-title">${item.partido}</div>
                         <div class="prediction">🎯 Pronóstico: ${item.pronostico}</div>
-                        <a href="#" class="btn">Apostar Ahora (Cuota ${item.cuota})</a>
+                        <a href="#" class="btn-apostar">Apostar Ahora (Cuota ${item.cuota})</a>
                     `;
                     container.appendChild(card);
                 });
-
             } catch (error) {
-                console.error("Error:", error);
-                container.innerHTML = "<div class='loading' style='color: #ef4444;'>Conectando con el servidor de la IA... Vuelve a recargar en unos segundos.</div>";
+                container.innerHTML = "<div style='text-align: center; color: #ef4444;'>Error al conectar con el servidor de IA. Vuelve a intentar.</div>";
             }
         }
-
-        cargarPronosticos();
     </script>
 </body>
 </html>
