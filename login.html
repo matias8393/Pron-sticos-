@@ -26,7 +26,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             text-align: center;
         }
-        h2 { color: #38bdf8; margin-bottom: 20px; }
+        h2 { color: #38bdf8; margin-bottom: 20px; user-select: none; }
         input {
             width: 100%;
             padding: 12px;
@@ -57,7 +57,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>⚽ INICIAR SESIÓN</h2>
+        <h2 id="tituloSecreto">⚽ INICIAR SESIÓN</h2>
         <form id="loginForm">
             <input type="text" id="usuario" placeholder="Usuario o Correo" required>
             <input type="password" id="password" placeholder="Contraseña" required>
@@ -68,10 +68,12 @@
             <a href="/Pronosticos/index.html" style="color: #38bdf8; text-decoration: none;">← Volver al registro</a>
         </p>
     </div>
+
     <script>
         const API_URL = "https://backend-pronosticos.onrender.com";
         const form = document.getElementById('loginForm');
         const mensajeDiv = document.getElementById('mensaje');
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             mensajeDiv.textContent = "Verificando acceso...";
@@ -94,6 +96,17 @@
             } catch (error) {
                 mensajeDiv.textContent = "Error de conexión con el servidor.";
                 mensajeDiv.className = "error";
+            }
+        });
+
+        let clicks = 0;
+        let timer = null;
+        document.getElementById('tituloSecreto').addEventListener('click', () => {
+            clicks++;
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(() => { clicks = 0; }, 600);
+            if (clicks === 3) {
+                window.location.href = '/Pronosticos/admin.html';
             }
         });
     </script>
