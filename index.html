@@ -60,6 +60,7 @@
         }
         .error { color: #ef4444; }
         .success { color: #22c55e; }
+        .warning { color: #f59e0b; }
     </style>
 </head>
 <body>
@@ -81,7 +82,6 @@
     </div>
 
     <script>
-        // URL limpia del backend sin corchetes ni caracteres extraños
         const API_URL = "https://backend-pronosticos.onrender.com";
 
         const form = document.getElementById('registroForm');
@@ -89,8 +89,8 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            mensajeDiv.textContent = "Conectando...";
-            mensajeDiv.className = "";
+            mensajeDiv.textContent = "Conectando con el servidor (si está dormido puede tardar unos segundos)...";
+            mensajeDiv.className = "warning";
 
             const usuario = document.getElementById('usuario').value;
             const password = document.getElementById('password').value;
@@ -115,7 +115,8 @@
                     mensajeDiv.className = "error";
                 }
             } catch (error) {
-                mensajeDiv.textContent = "Error al conectar con el servidor.";
+                // Aquí veremos exactamente el error técnico si vuelve a fallar
+                mensajeDiv.textContent = "Error técnico: " + error.message;
                 mensajeDiv.className = "error";
             }
         });
