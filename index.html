@@ -20,349 +20,105 @@
         .container {
             max-width: 450px;
             width: 100%;
-        }
-        .card-box {
             background-color: #1e293b;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 1px solid #334155;
-            margin-bottom: 20px;
-        }
-        h1, h2, h3 {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             text-align: center;
+        }
+        h2 {
             color: #38bdf8;
-            margin-top: 0;
+            margin-bottom: 20px;
         }
         input {
             width: 100%;
             padding: 12px;
             margin: 10px 0;
-            border-radius: 8px;
+            background-color: #0f172a;
             border: 1px solid #334155;
-            background: #0f172a;
-            color: white;
+            color: #fff;
+            border-radius: 8px;
             box-sizing: border-box;
-            font-size: 15px;
         }
         button {
             width: 100%;
             padding: 12px;
+            margin-top: 15px;
             background-color: #2563eb;
             color: white;
             border: none;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 15px;
-            margin-top: 10px;
         }
-        button:hover { background-color: #1d4ed8; }
-        .switch-btn {
-            background: none;
-            border: none;
-            color: #38bdf8;
-            text-align: center;
-            width: 100%;
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        #mensaje {
             margin-top: 15px;
-            cursor: pointer;
             font-size: 14px;
         }
-        .msg {
-            text-align: center;
-            font-size: 13px;
-            margin-top: 10px;
-        }
         .error { color: #ef4444; }
-        .success { color: #4ade80; }
-
-        #vistas-auth, #vista-cliente, #vista-admin { display: none; }
-        
-        .match-card {
-            background-color: #1e293b;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            border: 1px solid #334155;
-        }
-        .match-time { font-size: 12px; color: #94a3b8; margin-bottom: 6px; }
-        .match-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-        .prediction { color: #4ade80; font-weight: 600; margin-bottom: 12px; }
-        .btn-apostar {
-            display: block; width: 100%; background-color: #2563eb; color: white;
-            text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; box-sizing: border-box;
-        }
-        .top-bar {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-        }
-        .logout-btn { background-color: #ef4444; width: auto; padding: 6px 12px; font-size: 12px; margin: 0; }
-        .user-row {
-            background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .btn-aprobar { background-color: #16a34a; width: auto; padding: 5px 10px; font-size: 12px; margin: 0; }
-        .btn-eliminar { background-color: #ef4444; width: auto; padding: 5px 10px; font-size: 12px; margin: 0; }
-        .section-divider { margin-top: 20px; border-top: 1px solid #334155; padding-top: 15px; }
+        .success { color: #22c55e; }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <h2>⚽ REGISTRO DE CLIENTE</h2>
+        
+        <form id="registroForm">
+            <input type="text" id="usuario" placeholder="Usuario o Correo" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <button type="submit">Solicitar Acceso</button>
+        </form>
 
-        <!-- 1. SECCIÓN DE AUTENTICACIÓN -->
-        <div id="vistas-auth">
-            <div id="form-login" class="card-box">
-                <h2>⚽ INICIAR SESIÓN</h2>
-                <input type="text" id="login-user" placeholder="Usuario">
-                <input type="password" id="login-pass" placeholder="Contraseña">
-                <button onclick="iniciarSesion()">Ingresar</button>
-                <p id="login-msg" class="msg error" style="display:none;"></p>
-                <button class="switch-btn" onclick="mostrarRegistro()">¿No tienes cuenta? Regístrate aquí</button>
-            </div>
+        <div id="mensaje"></div>
 
-            <div id="form-registro" class="card-box" style="display:none;">
-                <h2>⚽ REGISTRO DE CLIENTE</h2>
-                <input type="text" id="reg-user" placeholder="Elige tu Usuario">
-                <input type="password" id="reg-pass" placeholder="Elige tu Contraseña">
-                <button onclick="registrarUsuario()">Solicitar Acceso</button>
-                <p id="reg-msg" class="msg" style="display:none;"></p>
-                <button class="switch-btn" onclick="mostrarLogin()">¿Ya tienes cuenta? Inicia sesión</button>
-            </div>
-        </div>
-
-        <!-- 2. VISTA CLIENTE -->
-        <div id="vista-cliente" style="max-width: 600px; width: 100%;">
-            <div class="top-bar">
-                <h2 style="color: #38bdf8; margin: 0;">⚽ PRONÓSTICOS DE LA IA</h2>
-                <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
-            </div>
-            <div id="pronosticos-container">
-                <div style="text-align: center; color: #94a3b8;">Cargando pronósticos...</div>
-            </div>
-        </div>
-
-        <!-- 3. VISTA ADMINISTRADOR -->
-        <div id="vista-admin" style="max-width: 600px; width: 100%;">
-            <div class="top-bar">
-                <h2 style="color: #38bdf8; margin: 0;">🛡️ PANEL ADMIN</h2>
-                <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
-            </div>
-            
-            <div class="card-box">
-                <h3>Solicitudes Pendientes</h3>
-                <div id="lista-pendientes">
-                    <p style="color: #94a3b8; text-align: center;">No hay solicitudes pendientes.</p>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <h3>Clientes Aprobados</h3>
-                <div id="lista-aprobados">
-                    <p style="color: #94a3b8; text-align: center;">No hay clientes aprobados.</p>
-                </div>
-            </div>
-        </div>
-
+        <p style="margin-top: 20px;">
+            <a href="#" style="color: #38bdf8; text-decoration: none;">¿Ya tienes cuenta? Inicia sesión</a>
+        </p>
     </div>
 
     <script>
-        // Corregido sin el /api al final
+        // URL limpia del backend sin corchetes ni caracteres extraños
         const API_URL = "https://backend-pronosticos.onrender.com";
 
-        window.onload = function() {
-            const usuarioGuardado = localStorage.getItem("usuarioActual");
-            if (usuarioGuardado) {
-                if (usuarioGuardado === "admin") {
-                    cargarAdmin();
-                } else {
-                    cargarCliente();
-                }
-            } else {
-                document.getElementById("vistas-auth").style.display = "block";
-            }
-        };
+        const form = document.getElementById('registroForm');
+        const mensajeDiv = document.getElementById('mensaje');
 
-        function mostrarRegistro() {
-            document.getElementById("form-login").style.display = "none";
-            document.getElementById("form-registro").style.display = "block";
-        }
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            mensajeDiv.textContent = "Conectando...";
+            mensajeDiv.className = "";
 
-        function mostrarLogin() {
-            document.getElementById("form-registro").style.display = "none";
-            document.getElementById("form-login").style.display = "block";
-        }
-
-        async function registrarUsuario() {
-            const u = document.getElementById("reg-user").value.trim();
-            const p = document.getElementById("reg-pass").value.trim();
-            const msg = document.getElementById("reg-msg");
-
-            if (!u || !p) {
-                msg.style.display = "block";
-                msg.className = "msg error";
-                msg.innerText = "Completa todos los campos";
-                return;
-            }
+            const usuario = document.getElementById('usuario').value;
+            const password = document.getElementById('password').value;
 
             try {
-                const res = await fetch(`${API_URL}/registrar`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ usuario: u, password: p })
+                const response = await fetch(`${API_URL}/registrar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ usuario, password })
                 });
-                const data = await res.json();
 
-                msg.style.display = "block";
-                if (res.ok) {
-                    msg.className = "msg success";
-                    msg.innerText = data.mensaje;
-                    document.getElementById("reg-user").value = "";
-                    document.getElementById("reg-pass").value = "";
-                } else {
-                    msg.className = "msg error";
-                    msg.innerText = data.error;
-                }
-            } catch (e) {
-                msg.style.display = "block";
-                msg.className = "msg error";
-                msg.innerText = "Error al conectar con el servidor.";
-            }
-        }
-
-        async function iniciarSesion() {
-            const u = document.getElementById("login-user").value.trim();
-            const p = document.getElementById("login-pass").value.trim();
-            const msg = document.getElementById("login-msg");
-
-            if (u === "admin" && p === "admin123") {
-                localStorage.setItem("usuarioActual", "admin");
-                cargarAdmin();
-                return;
-            }
-
-            try {
-                const res = await fetch(`${API_URL}/login`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ usuario: u, password: p })
-                });
-                const data = await res.json();
-
-                if (res.ok) {
-                    localStorage.setItem("usuarioActual", u);
-                    cargarCliente();
-                } else {
-                    msg.style.display = "block";
-                    msg.innerText = data.error;
-                }
-            } catch (e) {
-                msg.style.display = "block";
-                msg.innerText = "Error al conectar con el servidor.";
-            }
-        }
-
-        function cerrarSesion() {
-            localStorage.removeItem("usuarioActual");
-            location.reload();
-        }
-
-        async function cargarCliente() {
-            document.getElementById("vistas-auth").style.display = "none";
-            document.getElementById("vista-admin").style.display = "none";
-            document.getElementById("vista-cliente").style.display = "block";
-
-            const container = document.getElementById("pronosticos-container");
-            try {
-                const response = await fetch(`${API_URL}/pronosticos`);
                 const data = await response.json();
 
-                container.innerHTML = "";
-                data.forEach(item => {
-                    const card = document.createElement("div");
-                    card.className = "match-card";
-                    card.innerHTML = `
-                        <div class="match-time">⏰ ${item.hora || 'MAÑANA'}</div>
-                        <div class="match-title">${item.partido}</div>
-                        <div class="prediction">🎯 Pronóstico: ${item.pronostico}</div>
-                        <a href="#" class="btn-apostar">Apostar Ahora (Cuota ${item.cuota})</a>
-                    `;
-                    container.appendChild(card);
-                });
-            } catch (e) {
-                container.innerHTML = "<div class='msg error'>Error al cargar los pronósticos.</div>";
-            }
-        }
-
-        async function cargarAdmin() {
-            document.getElementById("vistas-auth").style.display = "none";
-            document.getElementById("vista-cliente").style.display = "none";
-            document.getElementById("vista-admin").style.display = "block";
-
-            try {
-                const resPend = await fetch(`${API_URL}/pendientes`);
-                const pendientes = await resPend.json();
-                const listaPend = document.getElementById("lista-pendientes");
-
-                if (pendientes.length === 0) {
-                    listaPend.innerHTML = "<p style='color: #94a3b8; text-align: center; font-size: 13px;'>No hay pendientes.</p>";
+                if (response.ok) {
+                    mensajeDiv.textContent = data.mensaje || "¡Solicitud enviada con éxito!";
+                    mensajeDiv.className = "success";
+                    form.reset();
                 } else {
-                    listaPend.innerHTML = "";
-                    pendientes.forEach(user => {
-                        const row = document.createElement("div");
-                        row.className = "user-row";
-                        row.innerHTML = `
-                            <span>👤 ${user}</span>
-                            <button class="btn-aprobar" onclick="aprobarUsuario('${user}')">Aprobar</button>
-                        `;
-                        listaPend.appendChild(row);
-                    });
+                    mensajeDiv.textContent = data.error || "Error al procesar la solicitud.";
+                    mensajeDiv.className = "error";
                 }
-
-                const resAp = await fetch(`${API_URL}/aprobados`);
-                const aprobados = await resAp.json();
-                const listaAp = document.getElementById("lista-aprobados");
-
-                if (aprobados.length === 0) {
-                    listaAp.innerHTML = "<p style='color: #94a3b8; text-align: center; font-size: 13px;'>No hay clientes activos.</p>";
-                } else {
-                    listaAp.innerHTML = "";
-                    aprobados.forEach(user => {
-                        const row = document.createElement("div");
-                        row.className = "user-row";
-                        row.innerHTML = `
-                            <span>👤 ${user}</span>
-                            <button class="btn-eliminar" onclick="eliminarUsuario('${user}')">Eliminar</button>
-                        `;
-                        listaAp.appendChild(row);
-                    });
-                }
-            } catch (e) {
-                console.error("Error al cargar datos del admin");
+            } catch (error) {
+                mensajeDiv.textContent = "Error al conectar con el servidor.";
+                mensajeDiv.className = "error";
             }
-        }
-
-        async function aprobarUsuario(usuario) {
-            try {
-                const res = await fetch(`${API_URL}/aprobar`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ usuario })
-                });
-                if (res.ok) cargarAdmin();
-            } catch (e) { alert("Error al aprobar"); }
-        }
-
-        async function eliminarUsuario(usuario) {
-            if (!confirm(`¿Seguro que deseas eliminar a ${usuario}?`)) return;
-            try {
-                const res = await fetch(`${API_URL}/eliminar`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ usuario })
-                });
-                if (res.ok) cargarAdmin();
-            } catch (e) { alert("Error al eliminar"); }
-        }
+        });
     </script>
 </body>
 </html>
