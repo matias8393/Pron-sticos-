@@ -166,7 +166,8 @@
     </div>
 
     <script>
-        const API_URL = "https://backend-pronosticos.onrender.com/api";
+        // Corregido sin el /api al final
+        const API_URL = "https://backend-pronosticos.onrender.com";
 
         window.onload = function() {
             const usuarioGuardado = localStorage.getItem("usuarioActual");
@@ -298,7 +299,6 @@
             document.getElementById("vista-admin").style.display = "block";
 
             try {
-                // Cargar pendientes
                 const resPend = await fetch(`${API_URL}/pendientes`);
                 const pendientes = await resPend.json();
                 const listaPend = document.getElementById("lista-pendientes");
@@ -318,7 +318,6 @@
                     });
                 }
 
-                // Cargar aprobados
                 const resAp = await fetch(`${API_URL}/aprobados`);
                 const aprobados = await resAp.json();
                 const listaAp = document.getElementById("lista-aprobados");
