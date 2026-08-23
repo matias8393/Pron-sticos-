@@ -77,7 +77,7 @@
         <div id="mensaje"></div>
 
         <p style="margin-top: 20px;">
-            <a href="./index.html" style="color: #38bdf8; text-decoration: none;">← Volver al registro</a>
+            <a href="/Pronosticos/index.html" style="color: #38bdf8; text-decoration: none;">← Volver al registro</a>
 
 
         </p>
