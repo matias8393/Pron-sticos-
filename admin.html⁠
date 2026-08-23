@@ -3,31 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administración de Pronósticos</title>
+    <title>Panel de Administración - Pronósticos</title>
     <style>
-        body { font-family: sans-serif; background-color: #0b0f19; color: white; padding: 20px; max-width: 600px; margin: 0 auto; }
-        .card { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 10px; }
-        button { background: #2563eb; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .logout { background: #ef4444; float: right; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0b0f19;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background-color: #1e293b;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        h2, h3 {
+            color: #38bdf8;
+            text-align: center;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            color: #fff;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .btn-aprobar {
+            background-color: #22c55e;
+            width: auto;
+            padding: 6px 12px;
+            margin: 0;
+        }
+        .btn-aprobar:hover { background-color: #16a34a; }
+        .btn-eliminar {
+            background-color: #ef4444;
+            width: auto;
+            padding: 6px 12px;
+            margin: 0;
+        }
+        .btn-eliminar:hover { background-color: #dc2626; }
+        .hidden { display: none; }
+        .user-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0f172a;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: 1px solid #334155;
+        }
+        #mensaje {
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .error { color: #ef4444; }
+        .success { color: #22c55e; }
+        .warning { color: #f59e0b; }
     </style>
 </head>
 <body>
-    <h1>Panel de Control <button class="logout" onclick="logout()">Salir</button></h1>
-    <div class="card">
-        <h3>Aprobar / Gestionar Partidos de la IA</h3>
-        <p>Aquí puedes revisar los análisis generados por la IA antes de que aparezcan en la página principal.</p>
-        <button onclick="alert('Partidos actualizados y publicados correctamente')">Publicar Cartelera de Mañana</button>
+
+    <div class="container">
+        <!-- SECCIÓN DE LOGIN ADMIN -->
+        <div id="loginSection">
+            <h2>🔐 ADMIN LOGIN</h2>
+            <form id="adminLoginForm">
+                <input type="email" id="correoAdmin" placeholder="Correo de Administrador" required>
+                <input type="password" id="passwordAdmin" placeholder="Contraseña" required>
+                <button type="submit">Ingresar al Panel</button>
+            </form>
+            <div id="mensajeLogin" id="mensaje"></div>
+        </div>
+
+        <!-- SECCIÓN DEL PANEL (Oculta hasta iniciar sesión) -->
+        <div id="panelSection" class="hidden">
+            <h2>⚙️ PANEL DE ADMINISTRACIÓN</h2>
+            <p style="text-align: center; color: #22c55e;">Sesión iniciada correctamente</p>
+            
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+
+            <h3>⏳ Usuarios Pendientes</h3>
+            <div id="listaPendientes">Cargando...</div>
+
+            <h3 style="margin-top: 30px;">✅ Clientes Aprobados</h3>
+            <div id="listaAprobados">Cargando...</div>
+
+            <button onclick="location.reload()" style="background-color: #475569; margin-top: 30px;">Cerrar Sesión</button>
+        </div>
     </div>
 
     <script>
-        // Protección de la ruta admin
-        if (localStorage.getItem("auth") !== "true") {
-            window.location.href = "login.html";
+        const API_URL = "https://backend-pronosticos.onrender.com";
+
+        const loginSection = document.getElementById('loginSection');
+        const panelSection = document.getElementById('panelSection');
+        const adminLoginForm = document.getElementById('adminLoginForm');
+        const mensajeLogin = document.getElementById('mensajeLogin');
+
+        // Manejar el login del admin
+        adminLoginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            mensajeLogin.textContent = "Verificando credenciales...";
+            mensajeLogin.className = "warning";
+
+            const correo = document.getElementById('correoAdmin').value;
+            const password = document.getElementById('passwordAdmin').value;
+
+            try {
+                const response = await fetch(`${API_URL}/admin-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ correo, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    loginSection.classList.add('hidden');
+                    panelSection.classList.remove('hidden');
+                    cargarDatosAdmin();
+                } else {
+                    mensajeLogin.textContent = data.error || "Credenciales incorrectas.";
+                    mensajeLogin.className = "error";
+                }
+            } catch (error) {
+                mensajeLogin.textContent = "Error de conexión con el servidor.";
+                mensajeLogin.className = "error";
+            }
+        });
+
+        // Cargar pendientes y aprobados
+        async function cargarDatosAdmin() {
+            try {
+                // Pendientes
+                const resPendientes = await fetch(`${API_URL}/pendientes`);
+                const pendientes = await resPendientes.json();
+                const divPendientes = document.getElementById('listaPendientes');
+                
+                if (pendientes.length === 0) {
+                    divPendientes.innerHTML = '<p style="text-align:center; color:#94a3b8;">No hay usuarios pendientes.</p>';
+                } else {
+                    divPendientes.innerHTML = pendientes.map(user => `
+                        <div class="user-row">
+                            <span>${user}</span>
+                            <button class="btn-aprobar" onclick="aprobarUsuario('${user}')">Aprobar</button>
+                        </div>
+                    `).join('');
+                }
+
+                // Aprobados
+                const resAprobados = await fetch(`${API_URL}/aprobados`);
+                const aprobados = await resAprobados.json();
+                const divAprobados = document.getElementById('listaAprobados');
+
+                if (aprobados.length === 0) {
+                    divAprobados.innerHTML = '<p style="text-align:center; color:#94a3b8;">No hay clientes aprobados todavía.</p>';
+                } else {
+                    divAprobados.innerHTML = aprobados.map(user => `
+                        <div class="user-row">
+                            <span>${user}</span>
+                            <button class="btn-eliminar" onclick="eliminarUsuario('${user}')">Eliminar</button>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error("Error al cargar datos", error);
+            }
         }
 
-        function logout() {
-            localStorage.removeItem("auth");
-            window.location.href = "login.html";
+        // Aprobar usuario
+        async function aprobarUsuario(usuario) {
+            await fetch(`${API_URL}/aprobar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario })
+            });
+            cargarDatosAdmin();
+        }
+
+        // Eliminar usuario
+        async function eliminarUsuario(usuario) {
+            await fetch(`${API_URL}/eliminar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario })
+            });
+            cargarDatosAdmin();
         }
     </script>
 </body>
