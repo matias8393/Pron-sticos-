@@ -26,7 +26,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             text-align: center;
         }
-        h2 { color: #38bdf8; margin-bottom: 20px; user-select: none; touch-action: manipulation; }
+        h2 { color: #38bdf8; margin-bottom: 20px; user-select: none; touch-action: manipulation; -webkit-touch-callout: none; }
         input {
             width: 100%;
             padding: 12px;
@@ -87,13 +87,11 @@
                 });
                 const data = await response.json();
                 if (response.ok) {
-    mensajeDiv.textContent = data.mensaje || "¡Login exitoso!";
-    mensajeDiv.className = "success";
-    setTimeout(() => {
-        window.location.href = '/Pronosticos/dashboard.html';
-    }, 800);
-}
-
+                    mensajeDiv.textContent = data.mensaje || "¡Login exitoso!";
+                    mensajeDiv.className = "success";
+                    setTimeout(() => {
+                        window.location.href = '/Pronosticos/dashboard.html';
+                    }, 800);
                 } else {
                     mensajeDiv.textContent = data.error || "Acceso denegado.";
                     mensajeDiv.className = "error";
@@ -104,16 +102,23 @@
             }
         });
 
-        let clicks = 0;
-        let timer = null;
-        document.getElementById('tituloSecreto').addEventListener('click', () => {
-            clicks++;
-            if (timer) clearTimeout(timer);
-            timer = setTimeout(() => { clicks = 0; }, 600);
-            if (clicks === 3) {
+        // Acceso admin: mantener presionado 2 segundos sobre el título
+        let pressTimer = null;
+        const titulo = document.getElementById('tituloSecreto');
+
+        function iniciarPress(e) {
+            pressTimer = setTimeout(() => {
                 window.location.href = '/Pronosticos/admin.html';
-            }
-        });
+            }, 2000);
+        }
+        function cancelarPress() {
+            if (pressTimer) clearTimeout(pressTimer);
+        }
+
+        titulo.addEventListener('touchstart', iniciarPress);
+        titulo.addEventListener('touchend', cancelarPress);
+        titulo.addEventListener('touchmove', cancelarPress);
+        titulo.addEventListener('contextmenu', (e) => e.preventDefault());
     </script>
 </body>
 </html>
