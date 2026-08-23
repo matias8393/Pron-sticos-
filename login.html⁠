@@ -108,7 +108,6 @@
                 if (response.ok) {
                     mensajeDiv.textContent = data.mensaje || "¡Login exitoso!";
                     mensajeDiv.className = "success";
-                    // Aquí puedes redirigir a tu panel de pronósticos si lo deseas
                 } else {
                     mensajeDiv.textContent = data.error || "Acceso denegado.";
                     mensajeDiv.className = "error";
