@@ -66,6 +66,19 @@
             align-items: center;
             gap: 6px;
         }
+        .liga {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 6px;
+        }
+        .analisis {
+            font-size: 12.5px;
+            color: #94a3b8;
+            margin-top: 8px;
+            line-height: 1.5;
+            border-top: 1px solid #334155;
+            padding-top: 8px;
+        }
         .estado {
             text-align: center;
             color: #94a3b8;
@@ -133,6 +146,8 @@
                         </div>
                         <div class="partido">${p.partido}</div>
                         <div class="pronostico">🎯 ${p.pronostico}</div>
+                        ${p.liga ? `<div class="liga">🏆 ${p.liga}</div>` : ''}
+                        ${p.analisis ? `<div class="analisis">${p.analisis}</div>` : ''}
                     </div>
                 `).join('');
             } catch (error) {
