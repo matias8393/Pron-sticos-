@@ -87,8 +87,13 @@
                 });
                 const data = await response.json();
                 if (response.ok) {
-                    mensajeDiv.textContent = data.mensaje || "¡Login exitoso!";
-                    mensajeDiv.className = "success";
+    mensajeDiv.textContent = data.mensaje || "¡Login exitoso!";
+    mensajeDiv.className = "success";
+    setTimeout(() => {
+        window.location.href = '/Pronosticos/dashboard.html';
+    }, 800);
+}
+
                 } else {
                     mensajeDiv.textContent = data.error || "Acceso denegado.";
                     mensajeDiv.className = "error";
