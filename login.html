@@ -89,6 +89,7 @@
                 if (response.ok) {
                     mensajeDiv.textContent = data.mensaje || "¡Login exitoso!";
                     mensajeDiv.className = "success";
+                    localStorage.setItem('usuarioActual', usuario);
                     setTimeout(() => {
                         window.location.href = '/Pronosticos/dashboard.html';
                     }, 800);
