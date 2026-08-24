@@ -79,6 +79,20 @@
             border-top: 1px solid #334155;
             padding-top: 8px;
         }
+        .btn-apostar {
+            display: block;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 12px;
+            padding: 10px;
+            background: #22c55e;
+            color: #0b0f19;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+        }
         .estado {
             text-align: center;
             color: #94a3b8;
@@ -103,6 +117,108 @@
             font-weight: bold;
             margin-top: 10px;
         }
+
+        /* ===== Módulo de gestión de capital ===== */
+        .seccion-capital {
+            margin-top: 35px;
+            border-top: 2px solid #1e293b;
+            padding-top: 25px;
+        }
+        .seccion-capital h2 {
+            color: #38bdf8;
+            font-size: 19px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .caja {
+            background: #1e293b;
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+        .caja input, .caja select {
+            width: 100%;
+            padding: 11px;
+            margin: 6px 0;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #fff;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        .caja label {
+            font-size: 12px;
+            color: #94a3b8;
+            display: block;
+            margin-top: 8px;
+        }
+        .btn-accion {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+        .resumen-capital {
+            display: flex;
+            justify-content: space-between;
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+        .resumen-capital div { text-align: center; flex: 1; }
+        .resumen-capital .label { font-size: 11px; color: #94a3b8; }
+        .resumen-capital .valor { font-size: 17px; font-weight: bold; margin-top: 4px; }
+        .positivo { color: #22c55e; }
+        .negativo { color: #ef4444; }
+        .dia-bloque {
+            background: #1e293b;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+        .dia-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 6px;
+        }
+        .apuesta-linea {
+            font-size: 12.5px;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+        .mes-bloque {
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+        .recomendacion-box {
+            background: #0f172a;
+            border-left: 4px solid #38bdf8;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 13px;
+            color: #cbd5e1;
+            line-height: 1.6;
+            margin-top: 12px;
+        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -116,14 +232,80 @@
     </div>
 
     <button class="btn-refrescar" onclick="cargarPronosticos()">🔄 Actualizar</button>
-    <a class="btn-volver" href="/Pronosticos/login.html">← Cerrar sesión</a>
+
+    <!-- ===== Gestión de capital ===== -->
+    <div class="seccion-capital">
+        <h2>💰 Gestión de Capital</h2>
+
+        <div id="cajaIniciar" class="caja">
+            <label>Capital inicial (Gs.)</label>
+            <input type="number" id="capitalInicialInput" placeholder="Ej: 1000000">
+            <button class="btn-accion" onclick="iniciarCapital()">Iniciar capital</button>
+        </div>
+
+        <div id="panelCapital" class="hidden">
+            <div class="resumen-capital">
+                <div>
+                    <div class="label">Capital inicial</div>
+                    <div class="valor" id="txtCapitalInicial">-</div>
+                </div>
+                <div>
+                    <div class="label">Capital actual</div>
+                    <div class="valor" id="txtCapitalActual">-</div>
+                </div>
+                <div>
+                    <div class="label">Resultado total</div>
+                    <div class="valor" id="txtResultadoTotal">-</div>
+                </div>
+            </div>
+
+            <div class="caja">
+                <label>Partido</label>
+                <input type="text" id="apPartido" placeholder="Ej: Barcelona vs Real Madrid">
+                <label>Cuota</label>
+                <input type="number" step="0.01" id="apCuota" placeholder="Ej: 1.9">
+                <label>Monto apostado (Gs.)</label>
+                <input type="number" id="apMonto" placeholder="Ej: 20000">
+                <label>Resultado</label>
+                <select id="apResultado">
+                    <option value="ganada">Ganada</option>
+                    <option value="perdida">Perdida</option>
+                </select>
+                <label>Fecha</label>
+                <input type="date" id="apFecha">
+                <button class="btn-accion" onclick="registrarApuesta()">Registrar apuesta</button>
+            </div>
+
+            <div id="mensajeCapital" class="estado"></div>
+
+            <h3 style="font-size:14px; color:#94a3b8; margin-top:20px;">📅 Detalle por día</h3>
+            <div id="resumenDiario"></div>
+
+            <h3 style="font-size:14px; color:#94a3b8; margin-top:20px;">📊 Resumen por mes</h3>
+            <div id="resumenMensual"></div>
+
+            <button class="btn-accion" style="background:#7c3aed;" onclick="pedirRecomendacion()">🤖 Pedir recomendación IA</button>
+            <div id="recomendacionBox"></div>
+        </div>
+    </div>
+
+    <a class="btn-volver" href="/Pronosticos/login.html" onclick="localStorage.removeItem('usuarioActual')">← Cerrar sesión</a>
 
     <script>
         const API_URL = "https://backend-pronosticos.onrender.com";
+        const usuarioActual = localStorage.getItem('usuarioActual');
+
+        if (!usuarioActual) {
+            window.location.href = '/Pronosticos/login.html';
+        }
 
         function colorPorIndice(i) {
             const colores = ["#38bdf8", "#f59e0b", "#22c55e", "#a78bfa", "#f43f5e"];
             return colores[i % colores.length];
+        }
+
+        function formatoGs(numero) {
+            return "Gs. " + Math.round(numero).toLocaleString('es-PY');
         }
 
         async function cargarPronosticos() {
@@ -148,6 +330,7 @@
                         <div class="pronostico">🎯 ${p.pronostico}</div>
                         ${p.liga ? `<div class="liga">🏆 ${p.liga}</div>` : ''}
                         ${p.analisis ? `<div class="analisis">${p.analisis}</div>` : ''}
+                        ${p.linkApuesta ? `<a class="btn-apostar" href="${p.linkApuesta}" target="_blank">🎰 Apostar aquí</a>` : ''}
                     </div>
                 `).join('');
             } catch (error) {
@@ -155,7 +338,143 @@
             }
         }
 
+        // ===== Capital =====
+        async function iniciarCapital() {
+            const capitalInicial = document.getElementById('capitalInicialInput').value;
+            if (!capitalInicial || capitalInicial <= 0) {
+                alert("Ingresá un capital inicial válido");
+                return;
+            }
+            try {
+                const res = await fetch(`${API_URL}/capital/iniciar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario: usuarioActual, capitalInicial })
+                });
+                if (res.ok) {
+                    cargarCapital();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || "Error al iniciar capital");
+                }
+            } catch (e) {
+                alert("Error de conexión");
+            }
+        }
+
+        async function registrarApuesta() {
+            const partido = document.getElementById('apPartido').value;
+            const cuota = document.getElementById('apCuota').value;
+            const monto = document.getElementById('apMonto').value;
+            const resultado = document.getElementById('apResultado').value;
+            const fecha = document.getElementById('apFecha').value || new Date().toISOString().split('T')[0];
+
+            if (!partido || !cuota || !monto) {
+                alert("Completá partido, cuota y monto");
+                return;
+            }
+
+            const mensajeDiv = document.getElementById('mensajeCapital');
+            mensajeDiv.textContent = "Registrando...";
+            try {
+                const res = await fetch(`${API_URL}/capital/apuesta`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario: usuarioActual, fecha, partido, cuota, monto, resultado })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    mensajeDiv.textContent = "✅ Apuesta registrada";
+                    document.getElementById('apPartido').value = '';
+                    document.getElementById('apCuota').value = '';
+                    document.getElementById('apMonto').value = '';
+                    cargarCapital();
+                } else {
+                    mensajeDiv.textContent = "❌ " + (data.error || "Error");
+                }
+            } catch (e) {
+                mensajeDiv.textContent = "❌ Error de conexión";
+            }
+        }
+
+        async function cargarCapital() {
+            try {
+                const res = await fetch(`${API_URL}/capital/${encodeURIComponent(usuarioActual)}`);
+                if (!res.ok) {
+                    document.getElementById('cajaIniciar').classList.remove('hidden');
+                    document.getElementById('panelCapital').classList.add('hidden');
+                    return;
+                }
+                const data = await res.json();
+
+                document.getElementById('cajaIniciar').classList.add('hidden');
+                document.getElementById('panelCapital').classList.remove('hidden');
+
+                document.getElementById('txtCapitalInicial').textContent = formatoGs(data.capitalInicial);
+                document.getElementById('txtCapitalActual').textContent = formatoGs(data.capitalActual);
+                const resultado = data.capitalActual - data.capitalInicial;
+                const txtResultado = document.getElementById('txtResultadoTotal');
+                txtResultado.textContent = (resultado >= 0 ? "+" : "") + formatoGs(resultado);
+                txtResultado.className = "valor " + (resultado >= 0 ? "positivo" : "negativo");
+
+                // Resumen diario (más reciente primero)
+                const diasOrdenados = [...data.resumenDiario].reverse();
+                document.getElementById('resumenDiario').innerHTML = diasOrdenados.length
+                    ? diasOrdenados.map(dia => `
+                        <div class="dia-bloque">
+                            <div class="dia-header">
+                                <span>${dia.fecha}</span>
+                                <span class="${dia.total >= 0 ? 'positivo' : 'negativo'}">${dia.total >= 0 ? '+' : ''}${formatoGs(dia.total)}</span>
+                            </div>
+                            ${dia.apuestas.map(a => `
+                                <div class="apuesta-linea">
+                                    <span>${a.partido} (cuota ${a.cuota})</span>
+                                    <span class="${a.gananciaPerdida >= 0 ? 'positivo' : 'negativo'}">${a.gananciaPerdida >= 0 ? '+' : ''}${formatoGs(a.gananciaPerdida)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `).join('')
+                    : '<div class="estado">Todavía no hay apuestas registradas</div>';
+
+                // Resumen mensual (más reciente primero)
+                const mesesOrdenados = [...data.resumenMensual].reverse();
+                document.getElementById('resumenMensual').innerHTML = mesesOrdenados.length
+                    ? mesesOrdenados.map(m => `
+                        <div class="mes-bloque">
+                            <span>${m.mes} (${m.cantidadApuestas} apuestas)</span>
+                            <span class="${m.total >= 0 ? 'positivo' : 'negativo'}">${m.total >= 0 ? '+' : ''}${formatoGs(m.total)}</span>
+                        </div>
+                    `).join('')
+                    : '<div class="estado">Sin datos todavía</div>';
+
+            } catch (e) {
+                document.getElementById('cajaIniciar').classList.remove('hidden');
+                document.getElementById('panelCapital').classList.add('hidden');
+            }
+        }
+
+        async function pedirRecomendacion() {
+            const box = document.getElementById('recomendacionBox');
+            box.innerHTML = '<div class="estado">Analizando tu gestión de capital...</div>';
+            try {
+                const res = await fetch(`${API_URL}/capital/recomendacion`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario: usuarioActual })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    box.innerHTML = `<div class="recomendacion-box">🤖 ${data.recomendacion}</div>`;
+                } else {
+                    box.innerHTML = `<div class="estado">${data.error || "No se pudo generar la recomendación"}</div>`;
+                }
+            } catch (e) {
+                box.innerHTML = '<div class="estado">Error de conexión</div>';
+            }
+        }
+
         cargarPronosticos();
+        cargarCapital();
     </script>
 </body>
 </html>
