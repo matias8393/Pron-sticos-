@@ -125,14 +125,21 @@
                 <div>
                     <div class="label">Capital inicial</div>
                     <div class="valor" id="txtCapitalInicial">-</div>
+                    <button class="btn-mini" style="margin-top:4px;" onclick="editarCapitalInicial()">✏️ Editar</button>
                 </div>
                 <div>
                     <div class="label">Capital actual</div>
                     <div class="valor" id="txtCapitalActual">-</div>
                 </div>
                 <div>
-                    <div class="label">Resultado total</div>
+                    <div class="label">Resultado apuestas</div>
                     <div class="valor" id="txtResultadoTotal">-</div>
+                </div>
+            </div>
+            <div class="resumen-capital" style="margin-top:-6px;">
+                <div>
+                    <div class="label">Movimientos manuales (+/-)</div>
+                    <div class="valor" id="txtTotalAjustes">-</div>
                 </div>
             </div>
 
@@ -263,6 +270,27 @@
             }
         }
 
+        async function editarCapitalInicial() {
+            const actual = document.getElementById('txtCapitalInicial').textContent;
+            const nuevo = prompt("Nuevo capital inicial (Gs.):", actual.replace(/[^\d]/g, ''));
+            if (!nuevo || isNaN(nuevo) || Number(nuevo) <= 0) return;
+            try {
+                const res = await fetch(`${API_URL}/capital/editar-inicial`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario: usuarioActual, capitalInicial: Number(nuevo) })
+                });
+                if (res.ok) {
+                    cargarCapital();
+                } else {
+                    const data = await res.json();
+                    alert(data.error || "Error al editar capital inicial");
+                }
+            } catch (e) {
+                alert("Error de conexión");
+            }
+        }
+
         async function ajustarCapital(tipo) {
             const monto = document.getElementById('montoAjuste').value;
             if (!monto || monto <= 0) {
@@ -365,10 +393,16 @@
 
                 document.getElementById('txtCapitalInicial').textContent = formatoGs(data.capitalInicial);
                 document.getElementById('txtCapitalActual').textContent = formatoGs(data.capitalActual);
-                const resultado = data.capitalActual - data.capitalInicial;
+
+                const resultado = data.resultadoApuestas;
                 const txtResultado = document.getElementById('txtResultadoTotal');
                 txtResultado.textContent = (resultado >= 0 ? "+" : "") + formatoGs(resultado);
                 txtResultado.className = "valor " + (resultado >= 0 ? "positivo" : "negativo");
+
+                const ajustes = data.totalAjustes;
+                const txtAjustes = document.getElementById('txtTotalAjustes');
+                txtAjustes.textContent = (ajustes >= 0 ? "+" : "") + formatoGs(ajustes);
+                txtAjustes.className = "valor " + (ajustes >= 0 ? "positivo" : "negativo");
 
                 document.getElementById('resumenDiario').innerHTML = data.resumenDiario.length
                     ? data.resumenDiario.map((dia, idx) => `
