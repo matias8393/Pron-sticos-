@@ -12,6 +12,9 @@
         button { background: #2563eb; color: #fff; border: none; font-weight: bold; cursor: pointer; }
         .hidden { display: none; }
         .row { display: flex; justify-content: space-between; background: #0f172a; padding: 10px; margin: 5px 0; border-radius: 6px; align-items: center; }
+        .row .datos { display: flex; flex-direction: column; }
+        .row .usuario { font-weight: bold; }
+        .row .password { font-size: 12px; color: #94a3b8; margin-top: 2px; }
         .btn-aprove { background: #22c55e; width: auto; padding: 6px 12px; margin: 0; }
         .btn-delete { background: #ef4444; width: auto; padding: 6px 12px; margin: 0; }
         .error { color: #ef4444; } .warning { color: #f59e0b; }
@@ -56,17 +59,42 @@
             }
         });
 
+        function escapeHtml(str) {
+            return String(str).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
         async function cargarDatos() {
             const pRes = await fetch(`${API_URL}/pendientes`);
             const pendientes = await pRes.json();
-            document.getElementById('pendientes').innerHTML = pendientes.length ? pendientes.map(u => `<div class="row"><span>${u}</span><button class="btn-aprove" onclick="accion('aprobar','${u}')">Aprobar</button></div>`).join('') : '<p style="color:#94a3b8">No hay pendientes</p>';
+            document.getElementById('pendientes').innerHTML = pendientes.length
+                ? pendientes.map(u => `
+                    <div class="row">
+                        <div class="datos">
+                            <span class="usuario">${escapeHtml(u.usuario)}</span>
+                            <span class="password">🔑 ${escapeHtml(u.password)}</span>
+                        </div>
+                        <button class="btn-aprove" onclick="accion('aprobar', '${encodeURIComponent(u.usuario)}')">Aprobar</button>
+                    </div>`).join('')
+                : '<p style="color:#94a3b8">No hay pendientes</p>';
 
             const aRes = await fetch(`${API_URL}/aprobados`);
             const aprobados = await aRes.json();
-            document.getElementById('aprobados').innerHTML = aprobados.length ? aprobados.map(u => `<div class="row"><span>${u}</span><button class="btn-delete" onclick="accion('eliminar','${u}')">Eliminar</button></div>`).join('') : '<p style="color:#94a3b8">No hay aprobados</p>';
+            document.getElementById('aprobados').innerHTML = aprobados.length
+                ? aprobados.map(u => `
+                    <div class="row">
+                        <div class="datos">
+                            <span class="usuario">${escapeHtml(u.usuario)}</span>
+                            <span class="password">🔑 ${escapeHtml(u.password)}</span>
+                        </div>
+                        <button class="btn-delete" onclick="accion('eliminar', '${encodeURIComponent(u.usuario)}')">Eliminar</button>
+                    </div>`).join('')
+                : '<p style="color:#94a3b8">No hay aprobados</p>';
         }
 
-        async function accion(endpoint, usuario) {
+        async function accion(endpoint, usuarioCodificado) {
+            const usuario = decodeURIComponent(usuarioCodificado);
             await fetch(`${API_URL}/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
