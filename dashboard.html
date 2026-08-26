@@ -36,6 +36,16 @@
             margin-top: 12px; padding: 10px; background: #22c55e; color: #0b0f19;
             font-weight: bold; text-decoration: none; border-radius: 8px; font-size: 14px;
         }
+        .stake-badge {
+            margin-top: 10px; padding: 8px 10px; border-radius: 8px;
+            font-size: 12.5px; font-weight: bold; text-align: center;
+        }
+        .stake-1 { background: #7f1d1d; color: #fecaca; }
+        .stake-2 { background: #7c2d12; color: #fed7aa; }
+        .stake-3 { background: #78350f; color: #fde68a; }
+        .stake-4 { background: #14532d; color: #bbf7d0; }
+        .stake-5 { background: #052e16; color: #86efac; border: 1px solid #22c55e; }
+        .stake-sin-datos { background: #1e293b; color: #64748b; font-weight: normal; }
         .estado { text-align: center; color: #94a3b8; margin-top: 20px; font-size: 13px; }
         .btn-volver { display: block; text-align: center; margin-top: 25px; color: #38bdf8; text-decoration: none; font-size: 14px; }
         .btn-refrescar {
@@ -220,6 +230,9 @@
                             <div class="pronostico">🎯 ${p.pronostico}</div>
                             ${p.liga ? `<div class="liga">🏆 ${p.liga}</div>` : ''}
                             ${p.analisis ? `<div class="analisis">${p.analisis}</div>` : ''}
+                            ${p.stake
+                                ? `<div class="stake-badge stake-${p.stake.nivel}">🛡️ Stake ${p.stake.nivel} · ${p.stake.etiqueta} · ${p.stake.porcentajeMin === p.stake.porcentajeMax ? p.stake.porcentajeMin : p.stake.porcentajeMin + '-' + p.stake.porcentajeMax}% del capital</div>`
+                                : `<div class="stake-badge stake-sin-datos">📊 Sin datos suficientes para recomendar stake</div>`}
                             ${p.linkApuesta ? `<a class="btn-apostar" href="${p.linkApuesta}" target="_blank">🎰 Apostar aquí</a>` : ''}
                         </div>
                     `).join('');
