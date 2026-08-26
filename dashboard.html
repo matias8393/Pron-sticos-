@@ -413,7 +413,7 @@
                             </summary>
                             ${dia.apuestas.map(a => `
                                 <div class="apuesta-linea ${a.eliminada ? 'eliminada' : ''}">
-                                    <div class="info">${a.partido}<br><span style="color:#64748b;">${a.pronosticoTexto} · cuota ${a.cuota}</span></div>
+                                    <div class="info">${a.partido}<br><span style="color:#64748b;">${a.pronosticoTexto || 'Análisis no disponible'} · cuota ${a.cuota}</span></div>
                                     ${lineaResultado(a)}
                                     ${a.eliminada
                                         ? `<button class="btn-mini" onclick="restaurarApuesta('${a.id}')">↪️ Rehacer</button>`
