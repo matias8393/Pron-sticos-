@@ -200,6 +200,7 @@
         const API_URL = "https://backend-pronosticos.onrender.com";
         const usuarioActual = localStorage.getItem('usuarioActual');
         let partidosDisponibles = [];
+        let capitalActualGlobal = null; // se completa apenas cargarCapital() responde
 
         if (!usuarioActual) {
             window.location.href = '/Pronosticos/login.html';
@@ -214,6 +215,46 @@
             return "Gs. " + Math.round(numero).toLocaleString('es-PY');
         }
 
+        function textoStakeBadge(stake) {
+            if (!stake) return `<div class="stake-badge stake-sin-datos">📊 Sin datos suficientes para recomendar stake</div>`;
+
+            const rangoPct = stake.porcentajeMin === stake.porcentajeMax
+                ? `${stake.porcentajeMin}%`
+                : `${stake.porcentajeMin}-${stake.porcentajeMax}%`;
+
+            let lineaMonto = '';
+            if (capitalActualGlobal !== null && capitalActualGlobal > 0) {
+                const montoMin = Math.round(capitalActualGlobal * stake.porcentajeMin / 100);
+                const montoMax = Math.round(capitalActualGlobal * stake.porcentajeMax / 100);
+                const textoMonto = montoMin === montoMax ? formatoGs(montoMin) : `${formatoGs(montoMin)} - ${formatoGs(montoMax)}`;
+                lineaMonto = `<br><span style="font-weight:bold;">${textoMonto}</span>`;
+            }
+
+            return `<div class="stake-badge stake-${stake.nivel}">🛡️ Stake ${stake.nivel} · ${stake.etiqueta} · ${rangoPct} del capital${lineaMonto}<br><span style="font-weight:normal; opacity:0.8;">Basado en análisis IA · fuente confiable · análisis técnico</span></div>`;
+        }
+
+        function renderTarjetas(data) {
+            const contenedor = document.getElementById('contenedor');
+            if (!data.length) {
+                contenedor.innerHTML = '<div class="estado">No hay pronósticos disponibles por ahora. Probá más tarde.</div>';
+                return;
+            }
+            contenedor.innerHTML = data.map((p, i) => `
+                <div class="card" style="border-left-color: ${colorPorIndice(i)}">
+                    <div class="card-top">
+                        <span class="hora">🕒 ${p.hora}</span>
+                        <span class="cuota">${p.cuota}</span>
+                    </div>
+                    <div class="partido">${p.partido}</div>
+                    <div class="pronostico">🎯 ${p.pronostico}</div>
+                    ${p.liga ? `<div class="liga">🏆 ${p.liga}</div>` : ''}
+                    ${p.analisis ? `<div class="analisis">${p.analisis}</div>` : ''}
+                    ${textoStakeBadge(p.stake)}
+                    ${p.linkApuesta ? `<a class="btn-apostar" href="${p.linkApuesta}" target="_blank">🎰 Apostar aquí</a>` : ''}
+                </div>
+            `).join('');
+        }
+
         async function cargarPronosticos() {
             const contenedor = document.getElementById('contenedor');
             contenedor.innerHTML = '<div class="estado">Cargando pronósticos...</div>';
@@ -221,28 +262,7 @@
                 const res = await fetch(`${API_URL}/pronosticos`);
                 const data = await res.json();
                 partidosDisponibles = data;
-
-                if (!data.length) {
-                    contenedor.innerHTML = '<div class="estado">No hay pronósticos disponibles por ahora. Probá más tarde.</div>';
-                } else {
-                    contenedor.innerHTML = data.map((p, i) => `
-                        <div class="card" style="border-left-color: ${colorPorIndice(i)}">
-                            <div class="card-top">
-                                <span class="hora">🕒 ${p.hora}</span>
-                                <span class="cuota">${p.cuota}</span>
-                            </div>
-                            <div class="partido">${p.partido}</div>
-                            <div class="pronostico">🎯 ${p.pronostico}</div>
-                            ${p.liga ? `<div class="liga">🏆 ${p.liga}</div>` : ''}
-                            ${p.analisis ? `<div class="analisis">${p.analisis}</div>` : ''}
-                            ${p.stake
-                                ? `<div class="stake-badge stake-${p.stake.nivel}">🛡️ Stake ${p.stake.nivel} · ${p.stake.etiqueta} · ${p.stake.porcentajeMin === p.stake.porcentajeMax ? p.stake.porcentajeMin : p.stake.porcentajeMin + '-' + p.stake.porcentajeMax}% del capital<br><span style="font-weight:normal; opacity:0.8;">basado en ${p.stake.muestraTotal ?? '?'} partido${p.stake.muestraTotal === 1 ? '' : 's'} analizados</span></div>`
-                                : `<div class="stake-badge stake-sin-datos">📊 Sin datos suficientes para recomendar stake</div>`}
-                            ${p.linkApuesta ? `<a class="btn-apostar" href="${p.linkApuesta}" target="_blank">🎰 Apostar aquí</a>` : ''}
-                        </div>
-                    `).join('');
-                }
-
+                renderTarjetas(data);
                 actualizarSelectorPartidos();
             } catch (error) {
                 contenedor.innerHTML = '<div class="estado">Error al cargar los pronósticos. Probá de nuevo.</div>';
@@ -451,6 +471,9 @@
 
                 document.getElementById('txtCapitalInicial').textContent = formatoGs(data.capitalInicial);
                 document.getElementById('txtCapitalActual').textContent = formatoGs(data.capitalActual);
+
+                capitalActualGlobal = data.capitalActual;
+                if (partidosDisponibles.length) renderTarjetas(partidosDisponibles);
 
                 const resultado = data.resultadoApuestas;
                 const txtResultado = document.getElementById('txtResultadoTotal');
