@@ -236,7 +236,7 @@
                             ${p.liga ? `<div class="liga">🏆 ${p.liga}</div>` : ''}
                             ${p.analisis ? `<div class="analisis">${p.analisis}</div>` : ''}
                             ${p.stake
-                                ? `<div class="stake-badge stake-${p.stake.nivel}">🛡️ Stake ${p.stake.nivel} · ${p.stake.etiqueta} · ${p.stake.porcentajeMin === p.stake.porcentajeMax ? p.stake.porcentajeMin : p.stake.porcentajeMin + '-' + p.stake.porcentajeMax}% del capital<br><span style="font-weight:normal; opacity:0.8;">basado en ${p.stake.muestraTotal} partido${p.stake.muestraTotal === 1 ? '' : 's'} analizados (${p.stake.fuente === 'api-football' ? 'API-Football' : 'TheSportsDB'})</span></div>`
+                                ? `<div class="stake-badge stake-${p.stake.nivel}">🛡️ Stake ${p.stake.nivel} · ${p.stake.etiqueta} · ${p.stake.porcentajeMin === p.stake.porcentajeMax ? p.stake.porcentajeMin : p.stake.porcentajeMin + '-' + p.stake.porcentajeMax}% del capital<br><span style="font-weight:normal; opacity:0.8;">basado en ${p.stake.muestraTotal ?? '?'} partido${p.stake.muestraTotal === 1 ? '' : 's'} analizados</span></div>`
                                 : `<div class="stake-badge stake-sin-datos">📊 Sin datos suficientes para recomendar stake</div>`}
                             ${p.linkApuesta ? `<a class="btn-apostar" href="${p.linkApuesta}" target="_blank">🎰 Apostar aquí</a>` : ''}
                         </div>
