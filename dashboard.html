@@ -98,6 +98,11 @@
         }
         .btn-mini:disabled { opacity: 0.5; }
         .eliminada { opacity: 0.5; text-decoration: line-through; }
+        .apuesta-linea.referencia { opacity: 0.7; font-style: italic; }
+        .referencia-resultado { font-size: 11.5px; white-space: nowrap; }
+        .referencia-acerto { color: #22c55e; }
+        .referencia-fallo { color: #ef4444; }
+        .referencia-pendiente { color: #f59e0b; }
 
         .mes-bloque {
             background: #0f172a; border-radius: 10px; padding: 12px; margin-bottom: 8px;
@@ -231,7 +236,7 @@
                             ${p.liga ? `<div class="liga">🏆 ${p.liga}</div>` : ''}
                             ${p.analisis ? `<div class="analisis">${p.analisis}</div>` : ''}
                             ${p.stake
-                                ? `<div class="stake-badge stake-${p.stake.nivel}">🛡️ Stake ${p.stake.nivel} · ${p.stake.etiqueta} · ${p.stake.porcentajeMin === p.stake.porcentajeMax ? p.stake.porcentajeMin : p.stake.porcentajeMin + '-' + p.stake.porcentajeMax}% del capital</div>`
+                                ? `<div class="stake-badge stake-${p.stake.nivel}">🛡️ Stake ${p.stake.nivel} · ${p.stake.etiqueta} · ${p.stake.porcentajeMin === p.stake.porcentajeMax ? p.stake.porcentajeMin : p.stake.porcentajeMin + '-' + p.stake.porcentajeMax}% del capital<br><span style="font-weight:normal; opacity:0.8;">basado en ${p.stake.muestraTotal} partido${p.stake.muestraTotal === 1 ? '' : 's'} analizados (${p.stake.fuente === 'api-football' ? 'API-Football' : 'TheSportsDB'})</span></div>`
                                 : `<div class="stake-badge stake-sin-datos">📊 Sin datos suficientes para recomendar stake</div>`}
                             ${p.linkApuesta ? `<a class="btn-apostar" href="${p.linkApuesta}" target="_blank">🎰 Apostar aquí</a>` : ''}
                         </div>
@@ -416,6 +421,21 @@
             return `<span class="${clase}">${signo}${formatoGs(a.gananciaPerdida)}</span>`;
         }
 
+        function iconoReferencia(resultado) {
+            if (resultado === 'acertado') return '<span class="referencia-resultado referencia-acerto">✅ Acertó</span>';
+            if (resultado === 'fallado') return '<span class="referencia-resultado referencia-fallo">❌ Falló</span>';
+            return '<span class="referencia-resultado referencia-pendiente">⏳ Pendiente</span>';
+        }
+
+        async function cargarRegistroPronosticos() {
+            try {
+                const res = await fetch(`${API_URL}/pronosticos/registro`);
+                return res.ok ? await res.json() : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
         async function cargarCapital() {
             try {
                 const res = await fetch(`${API_URL}/capital/${encodeURIComponent(usuarioActual)}`);
@@ -442,8 +462,23 @@
                 txtAjustes.textContent = (ajustes >= 0 ? "+" : "") + formatoGs(ajustes);
                 txtAjustes.className = "valor " + (ajustes >= 0 ? "positivo" : "negativo");
 
-                document.getElementById('resumenDiario').innerHTML = data.resumenDiario.length
-                    ? data.resumenDiario.map((dia, idx) => `
+                const registro = await cargarRegistroPronosticos();
+                const idsApostados = new Set();
+                (data.resumenDiario || []).forEach(dia => dia.apuestas.forEach(a => { if (a.idEvento) idsApostados.add(a.idEvento); }));
+
+                const diasMap = {};
+                (data.resumenDiario || []).forEach(dia => {
+                    diasMap[dia.fecha] = { fecha: dia.fecha, total: dia.total, apuestas: dia.apuestas, referencias: [] };
+                });
+                registro.forEach(r => {
+                    if (idsApostados.has(r.idEvento)) return; // ya se muestra como apuesta real más abajo
+                    if (!diasMap[r.fechaISO]) diasMap[r.fechaISO] = { fecha: r.fechaISO, total: 0, apuestas: [], referencias: [] };
+                    diasMap[r.fechaISO].referencias.push(r);
+                });
+                const resumenDiarioCombinado = Object.values(diasMap).sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+                document.getElementById('resumenDiario').innerHTML = resumenDiarioCombinado.length
+                    ? resumenDiarioCombinado.map((dia, idx) => `
                         <details class="dia-bloque" ${idx === 0 ? 'open' : ''}>
                             <summary>
                                 <span>📅 ${dia.fecha}</span>
@@ -456,6 +491,12 @@
                                     ${a.eliminada
                                         ? `<button class="btn-mini" onclick="restaurarApuesta('${a.id}', this)">↪️ Rehacer</button>`
                                         : `<button class="btn-mini" onclick="eliminarApuesta('${a.id}', this)">🗑️</button>`}
+                                </div>
+                            `).join('')}
+                            ${dia.referencias.map(r => `
+                                <div class="apuesta-linea referencia">
+                                    <div class="info">${r.partido}<br><span style="color:#64748b;">${r.pronosticoTexto} · cuota ${r.cuotaSugerida} · <em>no apostado</em></span></div>
+                                    ${iconoReferencia(r.resultado)}
                                 </div>
                             `).join('')}
                         </details>
