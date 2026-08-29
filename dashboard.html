@@ -382,6 +382,9 @@
                     cargarCapital();
                 } else {
                     mensajeDiv.textContent = "❌ " + (data.error || "Error");
+                    if (data.error && data.error.includes("ya no está disponible")) {
+                        cargarPronosticos(); // refresca la lista sola en vez de dejar la vieja
+                    }
                 }
             } catch (e) {
                 mensajeDiv.textContent = "❌ Error de conexión";
