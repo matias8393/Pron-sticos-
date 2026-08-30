@@ -97,7 +97,6 @@
             font-size: 11px; padding: 4px 8px; white-space: nowrap;
         }
         .btn-mini:disabled { opacity: 0.5; }
-        .eliminada { opacity: 0.5; text-decoration: line-through; }
         .apuesta-linea.referencia { opacity: 0.7; font-style: italic; }
         .referencia-resultado { font-size: 11.5px; white-space: nowrap; }
         .referencia-acerto { color: #22c55e; }
@@ -416,27 +415,6 @@
             }
         }
 
-        async function restaurarApuesta(apuestaId, btn) {
-            if (btn) { btn.disabled = true; btn.textContent = "..."; }
-            try {
-                const res = await fetch(`${API_URL}/capital/apuesta/restaurar`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ usuario: usuarioActual, apuestaId })
-                });
-                const data = await res.json().catch(() => ({}));
-                if (res.ok) {
-                    cargarCapital();
-                } else {
-                    alert(data.error || "No se pudo restaurar la apuesta");
-                    if (btn) { btn.disabled = false; btn.textContent = "↪️ Rehacer"; }
-                }
-            } catch (e) {
-                alert("Error de conexión al restaurar la apuesta");
-                if (btn) { btn.disabled = false; btn.textContent = "↪️ Rehacer"; }
-            }
-        }
-
         function lineaResultado(a) {
             if (a.resultado === 'pendiente') return '<span class="pendiente-txt">Pendiente</span>';
             const signo = a.gananciaPerdida >= 0 ? '+' : '';
@@ -511,12 +489,10 @@
                                 <span class="${dia.total >= 0 ? 'positivo' : 'negativo'}">${dia.total >= 0 ? '+' : ''}${formatoGs(dia.total)}</span>
                             </summary>
                             ${dia.apuestas.map(a => `
-                                <div class="apuesta-linea ${a.eliminada ? 'eliminada' : ''}">
+                                <div class="apuesta-linea">
                                     <div class="info">${a.partido}<br><span style="color:#64748b;">${a.pronosticoTexto || 'Análisis no disponible'} · cuota ${a.cuota}</span></div>
                                     ${lineaResultado(a)}
-                                    ${a.eliminada
-                                        ? `<button class="btn-mini" onclick="restaurarApuesta('${a.id}', this)">↪️ Rehacer</button>`
-                                        : `<button class="btn-mini" onclick="eliminarApuesta('${a.id}', this)">🗑️</button>`}
+                                    <button class="btn-mini" onclick="eliminarApuesta('${a.id}', this)">🗑️</button>
                                 </div>
                             `).join('')}
                             ${dia.referencias.map(r => `
