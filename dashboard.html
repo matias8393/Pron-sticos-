@@ -428,6 +428,26 @@
             return '<span class="referencia-resultado referencia-pendiente">⏳ Pendiente</span>';
         }
 
+        async function reabrirReferencia(idEvento, btn) {
+            if (btn) { btn.disabled = true; btn.textContent = "..."; }
+            try {
+                const res = await fetch(`${API_URL}/pronosticos/registro/reabrir`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idEvento })
+                });
+                if (res.ok) {
+                    cargarCapital();
+                } else {
+                    alert("No se pudo reabrir");
+                    if (btn) { btn.disabled = false; btn.textContent = "🔄"; }
+                }
+            } catch (e) {
+                alert("Error de conexión");
+                if (btn) { btn.disabled = false; btn.textContent = "🔄"; }
+            }
+        }
+
         async function cargarRegistroPronosticos() {
             try {
                 const res = await fetch(`${API_URL}/pronosticos/registro`);
@@ -499,6 +519,7 @@
                                 <div class="apuesta-linea referencia">
                                     <div class="info">${r.partido}<br><span style="color:#64748b;">${r.pronosticoTexto} · cuota ${r.cuotaSugerida} · <em>no apostado</em></span></div>
                                     ${iconoReferencia(r.resultado)}
+                                    ${r.resultado !== 'pendiente' ? `<button class="btn-mini" onclick="reabrirReferencia('${r.idEvento}', this)" title="Reabrir si el resultado está mal">🔄</button>` : ''}
                                 </div>
                             `).join('')}
                         </details>
